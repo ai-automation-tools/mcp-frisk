@@ -15,6 +15,10 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+**Docs**
+- Gate check in `docs/reports/2026-gate-check.md`: eight existing MCP scanners compared. No maintained offline tool covers the three Musts, so the build continues. *Slice 0: Gate check*
+- Threat model in `docs/threat-model.md`: TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm checked against primary sources, with the spec's mischaracterizations noted and a scope question opened in `docs/OPEN-QUESTIONS.md`. *Slice 0: Gate check*
+
 ## 2026-11-05
 
 **Added**

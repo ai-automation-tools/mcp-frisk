@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_0:_gate_check-F59E0B?style=for-the-badge" alt="Now: Slice 0, gate check">
+  <img src="https://img.shields.io/badge/now-slice_1:_frisk_a_config-F59E0B?style=for-the-badge" alt="Now: Slice 1, frisk a config">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -31,8 +31,8 @@ owns; no item needs a real key, a running MCP server or network access.
 
 ## 🧭 Slice 0: Gate check
 
-- [ ] `small` **Is this already built?** Write `docs/reports/2026-gate-check.md`: does mcpguard, mcp-cve-lint, or Snyk agent-scan in a mode that skips starting servers already lint MCP configs offline with no account? Does Cisco's mcp-scanner do anything useful with no API keys? Link each repo or doc, say when it was checked, and end with a one-line verdict. If a maintained offline tool already covers the spec's three Musts, add a `🔒 Needs owner` item under this one asking whether to stop (the build plan's first stop rule) and build nothing else until Mike answers. Link the report from `docs/README.md`.
-- [ ] `small` **Threat model primaries.** Fetch the primary sources for TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm, and write `docs/threat-model.md`: what each one is, whether it's a repo-borne or local config attack, and which planned rule (shell shape, secret, or none) would catch it. Anything that turns out to be mischaracterized in the spec gets a line saying so. Link it from `docs/README.md`.
+- [x] `small` **Is this already built?** Write `docs/reports/2026-gate-check.md`: does mcpguard, mcp-cve-lint, or Snyk agent-scan in a mode that skips starting servers already lint MCP configs offline with no account? Does Cisco's mcp-scanner do anything useful with no API keys? Link each repo or doc, say when it was checked, and end with a one-line verdict. If a maintained offline tool already covers the spec's three Musts, add a `🔒 Needs owner` item under this one asking whether to stop (the build plan's first stop rule) and build nothing else until Mike answers. Link the report from `docs/README.md`. — done 2026-11-06: [reports/2026-gate-check.md](reports/2026-gate-check.md), verdict: no maintained offline tool covers the three Musts, so the stop rule doesn't fire
+- [x] `small` **Threat model primaries.** Fetch the primary sources for TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm, and write `docs/threat-model.md`: what each one is, whether it's a repo-borne or local config attack, and which planned rule (shell shape, secret, or none) would catch it. Anything that turns out to be mischaracterized in the spec gets a line saying so. Link it from `docs/README.md`. — done 2026-11-06: [threat-model.md](threat-model.md). All four checked against primaries; TrustFall, CVE-2026-47751 and Miasma are mischaracterized, and only CVE-2026-57860's PoC trips a planned rule. Scope question in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)
 
 ## 🔎 Slice 1: Frisk a config
 

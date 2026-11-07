@@ -54,8 +54,8 @@ SARIF output; GitHub Action; more clients (Windsurf, Gemini CLI, Copilot, Contin
 
 ## Open questions
 
-- Do mcpguard / mcp-cve-lint / Snyk's skip-servers mode already cover this? Owner: first roadmap item, by 2026-11-02.
-- Are TrustFall, CVE-2026-47751, CVE-2026-57860 correctly characterised? Fetch primaries before writing rule docs.
+- Do mcpguard / mcp-cve-lint / Snyk's skip-servers mode already cover this? Owner: first roadmap item, by 2026-11-02. **Answered 2026-11-06:** no maintained offline tool covers the three Musts; see [the gate check](../reports/2026-gate-check.md).
+- Are TrustFall, CVE-2026-47751, CVE-2026-57860 correctly characterised? Fetch primaries before writing rule docs. **Answered 2026-11-06:** not all of them; see [the threat model](../threat-model.md). The scope question it raised is in [OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md).
 
 ## Mike's approval notes
 

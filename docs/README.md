@@ -20,12 +20,15 @@
 |:---|:---|
 | [**🗺️ ROADMAP.md**](ROADMAP.md) | The release gates in build order, and what waits until after the repo goes public. |
 | [**📋 CHANGELOG.md**](CHANGELOG.md) | Every change, newest first. Roadmap items show up here the run they're ticked. |
+| [**❓ OPEN-QUESTIONS.md**](OPEN-QUESTIONS.md) | Decisions waiting on the owner. |
 
 ## 📦 Product and decisions
 
 | Section | What's inside |
 |:---|:---|
 | [**📦 product/**](product/README.md) | The spec with its Won't list, and the build plan that marks Slices 0 to 3 as the MVP. |
+| [**🧨 threat-model.md**](threat-model.md) | The four named attacks, checked against primary sources, and which planned rule would catch each. |
+| [**🚧 Gate check**](reports/2026-gate-check.md) | Whether an existing tool already does this (no maintained offline one does), checked 2026-11-06. |
 | [**⚖️ ADR-001**](decisions/adr-001-typescript-shared-core.md) | Why one TypeScript core serves both the CLI and the browser demo, instead of a Go binary. |
 
 <p align="right">(<a href="#docs-top">back to top</a>)</p>
