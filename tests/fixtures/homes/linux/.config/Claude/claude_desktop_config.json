@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "desktop-files": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/fixture/Documents"] }
+  }
+}

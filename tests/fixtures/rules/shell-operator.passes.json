@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "flags": { "command": "node", "args": ["server.js", "--read-only", "--root=/srv/data"] },
+    "single-ampersand-url": { "command": "node", "args": ["server.js", "--endpoint=https://api.example.test/v1?a=1&b=2"] },
+    "redirect-free": { "command": "python", "args": ["-m", "mcp_server", "--log-level=info"] }
+  }
+}

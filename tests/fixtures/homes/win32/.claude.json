@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "win-code": { "command": "cmd", "args": ["/c", "node", "server.js"] }
+  }
+}

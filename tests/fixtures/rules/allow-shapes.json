@@ -1,0 +1,15 @@
+{
+  // Known launcher shapes: none of these may produce a finding.
+  "mcpServers": {
+    "npx": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "/srv/data"] },
+    "npx-yes": { "command": "npx.cmd", "args": ["--yes", "@scope/some-mcp-server@1.2.3"] },
+    "uvx": { "command": "uvx", "args": ["mcp-server-fetch"] },
+    "uvx-from": { "command": "uvx", "args": ["--from", "git+https://github.com/example/mcp-server", "mcp-server"] },
+    "docker-run": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}" }
+    },
+    "docker-volume": { "command": "docker", "args": ["run", "--rm", "-i", "-v", "/srv/data:/data:ro", "example/mcp-server:latest"] }
+  },
+}

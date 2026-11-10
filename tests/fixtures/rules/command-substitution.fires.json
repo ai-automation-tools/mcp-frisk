@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "backticks": { "command": "node", "args": ["server.js", "--root=`pwd`"] },
+    "dollar-paren": { "command": "node", "args": ["server.js", "--user=$(whoami)"] },
+    "in-command": { "command": "$(which node)", "args": ["server.js"] }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./docs"]
+    },
+    "build-helper": {
+      "command": "bash",
+      "args": ["-c", "npm run build && node dist/server.js"]
+    }
+  }
+}

@@ -40,7 +40,9 @@ Full spec: `docs/product/spec.md`. Slice order: `docs/product/build-plan.md`. Wo
   touching the real home folder.
 - The rule and secret modules must not import Node built-ins: the browser demo in `site/`
   imports them too (ADR-001). File reading and path discovery live in separate Node-only
-  modules.
+  modules (`discover.ts`, `scan.ts`, `main.ts`). The browser-safe set is listed in
+  `BROWSER_SAFE` in `tests/cli.test.ts`, which fails if one of them imports anything else at
+  runtime; add a new browser-safe module there.
 - Settings live in `.env` at the repo root, names in `.env.example`; the real environment
   wins. There are none today, and the product's promise (no network, no keys) means there
   should rarely be one. If one is ever needed, load it with Node's `util.parseEnv`. Never

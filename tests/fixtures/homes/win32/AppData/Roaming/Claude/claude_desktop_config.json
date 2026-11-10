@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "win-desktop": { "command": "cmd", "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"] }
+  }
+}

@@ -33,9 +33,9 @@
 ---
 
 > [!WARNING]
-> **Nothing works yet.** This is the scaffold. `mcpfrisk` prints its version and that's all;
-> discovery, rules and the demo arrive one roadmap item at a time. The [roadmap](docs/ROADMAP.md)
-> says what's next.
+> **Half built.** `mcpfrisk` finds and parses MCP configs and flags shell-injection shapes.
+> The secret detector, `--json`, `--fail-on` and the browser demo arrive one roadmap item at a
+> time. The [roadmap](docs/ROADMAP.md) says what's next.
 
 ## 🎯 What it's for
 
@@ -44,13 +44,26 @@ is two risky things in one file. Its `command` and `args` are code your agent ru
 block is where people paste API keys. A repo you clone can ship one, and some clients run it
 when you open the folder.
 
-mcp-frisk is a linter for that file. It is planned to:
+mcp-frisk is a linter for that file:
 
-| Check | What it flags |
-|:---|:---|
-| **Shell shapes** | `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks, and `;`, `&&` or `\|` in args. Plain `npx -y <pkg>`, `uvx` and `docker run` pass. |
-| **Plaintext secrets** | Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` or args, shown only as prefix plus last four. |
-| **Report** | Text, or JSON in the Agent Security Suite's agent inventory format, with a non-zero exit above `--fail-on` so a hook or CI job can gate on it. |
+| Check | What it flags | Status |
+|:---|:---|:---|
+| **Shell shapes** | `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks and `$(...)`, and `;`, `&&` or `\|` in `command` or `args`. Plain `npx -y <pkg>`, `uvx` and `docker run` pass. | Works |
+| **Plaintext secrets** | Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` or args, shown only as prefix plus last four. | Planned |
+| **Report** | Text, or JSON in the Agent Security Suite's agent inventory format, with a non-zero exit above `--fail-on` so a hook or CI job can gate on it. | Text works; JSON and `--fail-on` planned |
+
+### Rules
+
+| Rule id | Severity | Fires on |
+|:---|:---|:---|
+| `mcp-frisk/shell-wrapper` | high | A shell started with its run-this-string flag: `sh`/`bash`/`zsh` `-c` (and `-lc`), `cmd /c` or `/k`, `powershell`/`pwsh` `-c`, `-Command` or `-EncodedCommand`. An `/usr/bin/env` prefix is seen through. `cmd /c npx -y <pkg>`, the usual Windows launcher, is reported as low. |
+| `mcp-frisk/command-substitution` | high | A backtick or `$(` anywhere in `command` or `args`. |
+| `mcp-frisk/shell-variable` | medium | A bare `$NAME`. The client-side forms `${NAME}` (Claude Code) and `${env:NAME}` (VS Code) don't fire, nor does a single-quoted or escaped `\$NAME`. |
+| `mcp-frisk/shell-operator` | medium | `;`, `&&`, `\|\|` or `\|` in `command` or `args`. |
+
+The rules are data in [`src/rules.ts`](src/rules.ts), which imports nothing from Node so the
+browser demo can load the same file. Each one has a fixture that fires it and one that doesn't
+in [`tests/fixtures/rules/`](tests/fixtures/rules/).
 
 It reads files and nothing else. It never starts or connects to a server, never spawns a
 process, and never sends anything off your machine. The browser demo runs the same rule code
@@ -68,18 +81,57 @@ in the page.
 From a clone, with Node 22.18 or newer:
 
 ```bash
-npm install          # dev dependencies only; mcp-frisk has no runtime dependencies yet
+npm install          # dev dependencies only; mcp-frisk has no runtime dependencies
 npm run build        # compiles src/ to dist/
-node dist/cli.js     # prints "mcpfrisk 0.0.0" for now
+node dist/cli.js     # frisks this folder's MCP configs and your own
 ```
+
+With no arguments it checks the current folder's `.mcp.json`, `.vscode/mcp.json` and
+`.cursor/mcp.json`, then the per-user configs:
+
+| Client | Windows | macOS | Linux |
+|:---|:---|:---|:---|
+| Claude Code | `~\.claude.json` | `~/.claude.json` | `~/.claude.json` |
+| Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json` | `~/Library/Application Support/Claude/claude_desktop_config.json` | `~/.config/Claude/claude_desktop_config.json` |
+| Cursor | `~\.cursor\mcp.json` | `~/.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| VS Code | `%APPDATA%\Code\User\mcp.json` and `settings.json` | `~/Library/Application Support/Code/User/` (same two) | `~/.config/Code/User/` (same two) |
+
+Files are read as JSONC (comments and trailing commas allowed). A file that doesn't parse, a
+server entry that isn't one, and a file that can't be read are each reported with a reason.
+
+```text
+mcpfrisk [options] [file ...]
+
+  file ...       check just these files instead of discovering configs
+  --home <dir>   read per-user configs from this home folder instead of yours
+  -h, --help     show help
+  -v, --version  print the version
+```
+
+On this repo's fixture `.mcp.json`:
+
+```text
+$ node dist/cli.js tests/fixtures/repo/.mcp.json
+mcpfrisk 0.0.0: checked 1 location, found 1 config with 2 servers.
+
+tests/fixtures/repo/.mcp.json: 2 servers, 2 findings
+  tests/fixtures/repo/.mcp.json:9  high    mcp-frisk/shell-wrapper   build-helper  "bash -c" hands the rest of the command line to a shell to run as code
+  tests/fixtures/repo/.mcp.json:9  medium  mcp-frisk/shell-operator  build-helper  shell operator "&&" chains or pipes commands wherever a shell reads this
+  no findings: filesystem (npx -y <pkg>)
+
+2 findings: 1 high, 1 medium.
+```
+
+The exit code is 0 for now, findings or not, and 2 for a bad flag. `--fail-on` comes with the
+report item.
 
 ## 🗂️ What's in here
 
 | Folder | What's inside |
 |:---|:---|
 | [**📚 docs/**](docs/README.md) | The roadmap, the changelog, the spec and build plan, and ADR-001. |
-| [**🧩 src/**](src/) | The CLI. One TypeScript core that the browser demo will import too. |
-| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`. |
+| [**🧩 src/**](src/) | The CLI. The parser, rules and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `frisk.ts`, `format.ts`) import nothing from Node, so the browser demo can load them; discovery and file reading (`discover.ts`, `scan.ts`) are Node-only. |
+| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. |
 | [**🖥️ site/**](site/) | The demo page and its favicon. A "coming soon" shell for now. |
 
 ## 🛠️ Development

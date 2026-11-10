@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "mac-code": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] }
+  }
+}

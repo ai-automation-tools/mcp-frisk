@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "notes": { "command": "node", "args": ["$HOME/notes-mcp/index.js"] }
+  }
+}

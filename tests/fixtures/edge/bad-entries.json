@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "good": { "command": "uvx", "args": ["mcp-server-time"] },
+    "not-an-object": "node server.js",
+    "numeric-command": { "command": 42 },
+    "args-string": { "command": "node", "args": "server.js --flag" },
+    "args-number": { "command": "node", "args": ["server.js", 8080] },
+    "nothing-to-run": { "env": { "DEBUG": "1" } },
+    "__proto__": { "command": "sh", "args": ["-c", "node server.js"] }
+  }
+}

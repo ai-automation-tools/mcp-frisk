@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "bash-script": { "command": "bash", "args": ["./start.sh", "-c", "config.yml"] },
+    "sh-version": { "command": "sh", "args": ["--version"] },
+    "cmd-no-c": { "command": "cmd.exe", "args": ["/q", "start.bat"] },
+    "powershell-file": { "command": "powershell", "args": ["-File", "start.ps1", "-c", "config.yml"] },
+    "node": { "command": "node", "args": ["-c", "server.js"] },
+    "remote": { "type": "http", "url": "https://mcp.example.test/mcp" }
+  }
+}

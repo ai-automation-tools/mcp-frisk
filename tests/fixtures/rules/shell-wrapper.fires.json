@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "sh-c": { "command": "sh", "args": ["-c", "node server.js"] },
+    "bash-c": { "command": "/bin/bash", "args": ["-c", "node server.js"] },
+    "bash-lc": { "command": "bash", "args": ["--norc", "-lc", "node server.js"] },
+    "zsh-in-command": { "command": "zsh -c", "args": ["node server.js"] },
+    "env-bash": { "command": "/usr/bin/env", "args": ["DEBUG=1", "bash", "-c", "node server.js"] },
+    "cmd-c": { "command": "cmd", "args": ["/c", "node", "server.js"] },
+    "cmd-exe-k": { "command": "C:\\Windows\\System32\\CMD.EXE", "args": ["/s", "/K", "node server.js"] },
+    "powershell-c": { "command": "powershell", "args": ["-NoProfile", "-c", "node server.js"] },
+    "pwsh-command": { "command": "pwsh.exe", "args": ["-Command", "node server.js"] },
+    "powershell-encoded": { "command": "powershell.exe", "args": ["-EncodedCommand", "bgBvAGQAZQA="] }
+  }
+}

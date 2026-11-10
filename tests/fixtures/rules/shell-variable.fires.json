@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "home": { "command": "node", "args": ["$HOME/mcp/server.js"] },
+    "mid-arg": { "command": "node", "args": ["server.js", "--root=/srv/$PROJECT_DIR/data"] },
+    "in-command": { "command": "$NODE_BIN", "args": ["server.js"] }
+  }
+}

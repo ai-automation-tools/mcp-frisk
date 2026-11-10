@@ -1,0 +1,11 @@
+{
+  // Client-side expansion forms: Claude Code's ${VAR} and VS Code's ${env:VAR} are filled in
+  // by the client, not by a shell.
+  "mcpServers": {
+    "claude-code-expansion": { "command": "node", "args": ["${HOME}/mcp/server.js", "--port=${PORT:-3000}"] },
+    "vscode-expansion": { "command": "node", "args": ["${env:HOME}/mcp/server.js", "${workspaceFolder}"] },
+    "single-quoted": { "command": "node", "args": ["'$HOME/literal'"] },
+    "escaped": { "command": "node", "args": ["server.js", "--price=\\$PRICE"] },
+    "price": { "command": "node", "args": ["server.js", "--label=costs $5"] }
+  }
+}
