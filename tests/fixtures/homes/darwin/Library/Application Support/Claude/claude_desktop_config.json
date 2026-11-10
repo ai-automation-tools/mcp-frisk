@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "mac-desktop": { "command": "/bin/zsh", "args": ["-c", "source ~/.zshrc; node server.js"] }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "numStartups": 12,
+  "mcpServers": {
+    "user-memory": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"] }
+  },
+  "projects": {
+    "/home/fixture/work/app": {
+      "mcpServers": {
+        "project-db": { "command": "sh", "args": ["-c", "node db-server.js | tee db.log"] }
+      }
+    }
+  }
+}

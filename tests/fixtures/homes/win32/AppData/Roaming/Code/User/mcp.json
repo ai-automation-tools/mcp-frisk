@@ -1,0 +1,5 @@
+{
+  "servers": {
+    "win-vscode": { "command": "powershell.exe", "args": ["-NoProfile", "-Command", "node server.js"] }
+  }
+}

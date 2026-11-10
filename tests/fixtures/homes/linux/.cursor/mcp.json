@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "cursor-tool": { "command": "python3", "args": ["-m", "cursor_tool", "--root=`pwd`"] }
+  }
+}

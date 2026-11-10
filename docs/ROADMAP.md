@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_1:_frisk_a_config-F59E0B?style=for-the-badge" alt="Now: Slice 1, frisk a config">
+  <img src="https://img.shields.io/badge/now-slice_2:_secrets_and_report-F59E0B?style=for-the-badge" alt="Now: Slice 2, secrets and report">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -36,7 +36,7 @@ owns; no item needs a real key, a running MCP server or network access.
 
 ## 🔎 Slice 1: Frisk a config
 
-- [ ] **Discover, parse and lint for shell injection** (MVP feature 1). `mcpfrisk` finds MCP configs in the current repo (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`) and the user's home (Claude Code, Claude Desktop, Cursor, VS Code) on Windows, macOS and Linux paths, taking the home directory as an argument so tests use fixture homes. Every server entry is parsed, JSONC included, or reported as unparseable with a reason; an empty config, malformed JSON and an unreadable file each have a fixture. Shell-injection rules flag `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks, and `;`, `&&` or `|` in args, each finding carrying rule id, server name, file and line; the allow-shape list (`npx -y <pkg>`, `uvx`, `docker run`) yields none. Every rule has a passing and a failing fixture. Rules live as data (ADR-001), in one module with no Node imports so the browser can load it. CI runs on `ubuntu-latest` and `windows-latest`.
+- [x] **Discover, parse and lint for shell injection** (MVP feature 1). `mcpfrisk` finds MCP configs in the current repo (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`) and the user's home (Claude Code, Claude Desktop, Cursor, VS Code) on Windows, macOS and Linux paths, taking the home directory as an argument so tests use fixture homes. Every server entry is parsed, JSONC included, or reported as unparseable with a reason; an empty config, malformed JSON and an unreadable file each have a fixture. Shell-injection rules flag `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks, and `;`, `&&` or `|` in args, each finding carrying rule id, server name, file and line; the allow-shape list (`npx -y <pkg>`, `uvx`, `docker run`) yields none. Every rule has a passing and a failing fixture. Rules live as data (ADR-001), in one module with no Node imports so the browser can load it. CI runs on `ubuntu-latest` and `windows-latest`. — done 2026-11-09: JSONC parser `src/jsonc.ts`, extractor `src/servers.ts`, four rules as data in `src/rules.ts` (shell-wrapper, command-substitution, shell-variable, shell-operator) plus the allow-shape list, discovery `src/discover.ts` for repo and Windows/macOS/Linux homes, `src/scan.ts` for unreadable and oversize files; fixtures in `tests/fixtures/`, CI on both OSes. Built to the spec as written; the auto-start question in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md) is still open
 
 ## 🔐 Slice 2: Secrets and report
 

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "plain": { "command": "node", "args": ["server.js", "--root=/srv/data"] },
+    "price": { "command": "node", "args": ["server.js", "--label=$5 plan (monthly)"] },
+    "client-expansion": { "command": "node", "args": ["server.js", "--token-var=${API_TOKEN}"] }
+  }
+}

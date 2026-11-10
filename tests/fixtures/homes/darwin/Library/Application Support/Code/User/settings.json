@@ -1,0 +1,9 @@
+{
+  // VS Code user settings: MCP servers sit under "mcp.servers".
+  "editor.fontSize": 14,
+  "mcp": {
+    "servers": {
+      "mac-vscode": { "command": "docker", "args": ["run", "-i", "--rm", "example/mcp-server"] }
+    }
+  }
+}

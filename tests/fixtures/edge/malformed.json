@@ -1,0 +1,6 @@
+{
+  "mcpServers": {
+    "broken": { "command": "node", "args": ["server.js"] }
+    "next": {}
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "mac-cursor": { "command": "uvx", "args": ["mcp-server-time"] }
+  }
+}

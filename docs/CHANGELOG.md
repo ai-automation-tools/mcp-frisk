@@ -15,6 +15,9 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+**Added**
+- `mcpfrisk` finds MCP configs in the current repo (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`) and the user's home (Claude Code, Claude Desktop, Cursor, VS Code) on Windows, macOS and Linux paths, parses them as JSONC, and flags shell-injection shapes with four rules (`shell-wrapper`, `command-substitution`, `shell-variable`, `shell-operator`) while `npx -y`, `uvx` and `docker run` pass. Each finding names its rule, server, file and line; unparseable files and entries and unreadable files get a reason. CI now runs on Ubuntu and Windows. *Slice 1: Frisk a config*
+
 **Docs**
 - Gate check in `docs/reports/2026-gate-check.md`: eight existing MCP scanners compared. No maintained offline tool covers the three Musts, so the build continues. *Slice 0: Gate check*
 - Threat model in `docs/threat-model.md`: TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm checked against primary sources, with the spec's mischaracterizations noted and a scope question opened in `docs/OPEN-QUESTIONS.md`. *Slice 0: Gate check*

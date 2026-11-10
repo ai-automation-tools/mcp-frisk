@@ -1,0 +1,5 @@
+{
+  "servers": {
+    "vscode-git": { "command": "uvx", "args": ["mcp-server-git"] }
+  }
+}

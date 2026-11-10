@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "win-cursor": { "command": "node", "args": ["C:\\tools\\mcp\\server.js", "--name=a;b"] }
+  }
+}
