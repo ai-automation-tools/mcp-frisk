@@ -12,9 +12,9 @@
 
 ---
 
-The MCP-Frisk Weekly Roadmap routine works this file top to bottom every Monday, Wednesday
-and Friday: it takes the first open item that isn't `🔒 Needs owner` (or up to six `small`
-ones), builds it, ticks it and opens a `roadmap/auto-<date>` PR. **Every item above
+The MCP-Frisk roadmap routine works this file top to bottom, one item per run, as
+`roadmap/auto-` PRs: it takes the first open item that isn't `🔒 Needs owner` (or up to six
+`small` ones), builds it and ticks it. **Every item above
 `## After public release` is a release gate.** mcp-frisk goes public when all of them are
 ticked and Mike says so. Ticking an item adds its line to the [changelog](CHANGELOG.md) and
 updates any doc it made stale, in the same commit.
@@ -54,7 +54,10 @@ owns; no item needs a real key, a running MCP server or network access.
 - [x] `small` **Secret scan.** `gitleaks git . --log-opts=--all` comes back clean on the full history. — done 2026-11-05: clean on the scaffold commit
 - [ ] `small` **README usage matches the code.** Install line, every command and flag, a sample run on a fixture config with its real output, and the spec's Won't list stated plainly (no launch blocking, no server starts, no network, no cloud tier). Each command run against the packed build (`npm pack`, installed in a scratch folder) and behaving as written.
 - [ ] `small` **Responsible use.** A README section saying the tool is defensive only: run it on systems and exports you own or are authorized to review; what it never does (no connection to any MCP server, no launch of a configured command, no change to the config it reads); and that the demo uses planted, fictional fixtures only. `SECURITY.md` links to it. (Pillar A release gate, org charter 2026-11-05.)
-- [ ] **Live demo at `https://ai-automation-tools.dev/mcp-frisk/`.** An `actions/deploy-pages` workflow builds and publishes `_site/` from `main` (enable Pages for the repo with `gh api` in the same PR), until the publish step moves it to `https://mcp-frisk-demo.ai-automation-tools.dev/`. The page shows the MVP working: paste or load the sample config, see its findings. It keeps the source bar and app-icon favicon from the shell, holds no real personal data or real keys, and makes no network call. The README hero's Live Demo badge points at it.
+- [ ] `small` **Inventory output validates in CI.** A CI step runs `mcpfrisk --json` on a committed fixture home with a planted problem (a `bash -c` server holding a fake key) and validates the output against `https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json` (the vendored copy in `schemas/`, checked to match the published one). It fails when the output doesn't validate or the finding is missing
+- [ ] `small` **Build stamp.** `<meta name="build" content="__BUILD_SHA__">` in `site/index.html`'s `<head>`
+- [ ] Decide whether **Slice 1b: auto-start and inline-code rules** (below, OPEN-QUESTIONS option b) is a release gate, since the threat model found the shell-shape rule misses every real repo-borne attack it studied; if yes, move it above Slice 2 🔒 Needs owner
+- [ ] **Live demo at `https://ai-automation-tools.dev/mcp-frisk/`.** An `actions/deploy-pages` workflow builds and publishes `_site/` from `main`, replacing `__BUILD_SHA__` with `${{ github.sha }}` before the upload (enable Pages for the repo with `gh api` in the same PR), until the publish step moves it to `https://mcp-frisk-demo.ai-automation-tools.dev/`. The page shows the MVP working: paste or load the sample config, see its findings. It keeps the source bar and app-icon favicon from the shell, holds no real personal data or real keys, and makes no network call. The README hero's Live Demo badge points at it.
 
 ## After public release
 
@@ -62,12 +65,13 @@ Nothing below blocks go-live.
 
 ## 🧩 Next slices
 
+- [ ] **Slice 1b: auto-start and inline-code rules** (OPEN-QUESTIONS option b). An info finding for a project config that defines an executable server, a rule for inline-code args (`node -e`, `python -c`), and a high finding when `.claude/settings.json` auto-enables project servers; a passing and failing fixture each
 - [ ] **Slice 4: SARIF and a GitHub Action.** `--sarif` output that GitHub code scanning accepts, and a composite Action that runs mcp-frisk on a repo's MCP configs and uploads it. Tested in this repo's own CI.
 - [ ] **Slice 5: more clients.** Discovery for Windsurf, Gemini CLI, GitHub Copilot and Continue, each with fixture homes on Windows and Linux paths.
 - [ ] **Slice 6: `.mcpfrisk.lock`.** Record each server's package and version; a later run reports what changed, including a new postinstall script.
 - [ ] **Slice 7: suppressions file.** `.mcpfrisk-ignore` with a rule id, a server and a required reason; suppressed findings still show in JSON with `status: accepted-risk`.
 - [ ] **Slice 8: revisit enforcement shims and a Go binary**, only if at least three outside users ask for either in issues.
-- [ ] **Move the agent inventory schema public.** When mcp-frisk is the suite's first public project to emit it, publish the schema from this repo (or a small `agent-inventory-schema` repo) and point the org docs' Agent Security Suite page at it.
+- [ ] `small` **Link the published schema.** README and `docs/` cite `https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json` as the format mcp-frisk writes
 
 ### 📣 Publish and promote
 
