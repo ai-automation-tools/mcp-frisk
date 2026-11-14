@@ -1,0 +1,14 @@
+{
+  // Planted, fake, random-looking values with no known provider prefix.
+  "mcpServers": {
+    "session": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": { "SESSION_SECRET": "FAKEq8vN2rT5xLp9WmK4cHy7BdF3gJs" }
+    },
+    "token-arg": {
+      "command": "uvx",
+      "args": ["example-mcp", "--token=FAKE7mW2xKp9LzR4vT8nB3cY6hJ"]
+    }
+  }
+}

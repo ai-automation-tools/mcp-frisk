@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { friskText } from "../src/frisk.ts";
 import type { FriskResult } from "../src/frisk.ts";
 import { exeName, RULES } from "../src/rules.ts";
+import { SECRET_RULES } from "../src/secrets.ts";
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
 
@@ -16,7 +17,7 @@ function friskFixture(name: string): Extract<FriskResult, { status: "ok" }> {
   return r;
 }
 
-for (const rule of RULES) {
+for (const rule of [...RULES, ...Object.values(SECRET_RULES)]) {
   const ruleId = `mcp-frisk/${rule.id}`;
 
   test(`${rule.id}: every server in the firing fixture gets a finding`, () => {

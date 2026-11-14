@@ -1,0 +1,18 @@
+{
+  // Long values that are not secrets: package names, paths, ids, references, a git hash.
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/fixture/projects/app-2026/docs", "C:\\Users\\fixture\\Documents"]
+    },
+    "plain-values": {
+      "command": "node",
+      "args": ["server.js", "--workspace-id", "123e4567-e89b-12d3-a456-426614174000", "--commit", "9fceb02d0ae598e95dc970b74767f19372d61af8"],
+      "env": {
+        "API_KEY": "${env:EXAMPLE_SERVICE_API_KEY_2026}",
+        "SERVICE_NAME": "example_reporting_service_v2",
+        "IMAGE": "ghcr.io/example/mcp-server:1.24.0"
+      }
+    }
+  }
+}

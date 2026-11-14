@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_2:_secrets_and_report-F59E0B?style=for-the-badge" alt="Now: Slice 2, secrets and report">
+  <img src="https://img.shields.io/badge/now-slice_3:_browser_demo-F59E0B?style=for-the-badge" alt="Now: Slice 3, browser demo">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -40,7 +40,7 @@ owns; no item needs a real key, a running MCP server or network access.
 
 ## 🔐 Slice 2: Secrets and report
 
-- [ ] **Secrets, redaction and the inventory report** (MVP feature 2). Plaintext keys in `env` and `args` are flagged by pattern for Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe, shown only as prefix plus last four (`sk-…a1b2`); a high-entropy string with no known prefix is a low-severity finding. Output is text by default and `--json` writes an agent inventory document (schema v0.1, vendored to `schemas/agent-inventory.schema.json`): one identity per server (`kind: mcp-server`, `platform: mcp`, stable `id`), `tools[]` with capability tags inferred from the config, `credentials[]` by fingerprint only (first 12 hex of SHA-256), findings with `ruleId` `mcp-frisk/<rule>`. A test validates the output against the schema, and a test greps every output for the fixture secrets and fails on a full match. `--fail-on <severity>` exits 1 when a finding meets it. A test runs the CLI with `net` and `child_process` stubbed to throw and proves no socket or process is opened.
+- [x] **Secrets, redaction and the inventory report** (MVP feature 2). Plaintext keys in `env` and `args` are flagged by pattern for Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe, shown only as prefix plus last four (`sk-…a1b2`); a high-entropy string with no known prefix is a low-severity finding. Output is text by default and `--json` writes an agent inventory document (schema v0.1, vendored to `schemas/agent-inventory.schema.json`): one identity per server (`kind: mcp-server`, `platform: mcp`, stable `id`), `tools[]` with capability tags inferred from the config, `credentials[]` by fingerprint only (first 12 hex of SHA-256), findings with `ruleId` `mcp-frisk/<rule>`. A test validates the output against the schema, and a test greps every output for the fixture secrets and fails on a full match. `--fail-on <severity>` exits 1 when a finding meets it. A test runs the CLI with `net` and `child_process` stubbed to throw and proves no socket or process is opened. — done 2026-11-13: detector and patterns as data in `src/secrets.ts` (browser-safe), report in `src/inventory.ts`, `--json` and `--fail-on` in `src/main.ts`, schema vendored byte-for-byte from the published v0.1; tests in `tests/secrets.test.ts`, `tests/report.test.ts` (ajv validation, planted-key grep, `--fail-on`) and `tests/no-io.test.ts` (sockets, DNS, fetch and child processes trapped via `tests/helpers/no-io.ts`)
 
 ## 🖥️ Slice 3: Browser demo
 

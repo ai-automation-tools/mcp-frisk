@@ -1,0 +1,11 @@
+# The secret detector's test fixtures plant fake keys so it has something to find. Each one
+# holds FAKE and fails its provider's checksum. Only those are allowed: both conditions must hold.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Planted fake keys in the secret-rule fixtures"
+condition = "AND"
+paths = ['''^tests/fixtures/rules/(plaintext-secret|high-entropy-string)\.(fires|passes)\.json$''']
+regexes = ['''FAKE''']
