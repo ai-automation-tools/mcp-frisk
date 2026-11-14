@@ -33,9 +33,9 @@
 ---
 
 > [!WARNING]
-> **Half built.** `mcpfrisk` finds and parses MCP configs and flags shell-injection shapes.
-> The secret detector, `--json`, `--fail-on` and the browser demo arrive one roadmap item at a
-> time. The [roadmap](docs/ROADMAP.md) says what's next.
+> **Not released yet.** The `mcpfrisk` CLI works: it finds MCP configs, flags shell-injection
+> shapes and plaintext keys, and writes text or an agent inventory JSON report. The browser demo
+> is next. The [roadmap](docs/ROADMAP.md) says what's left before release.
 
 ## 🎯 What it's for
 
@@ -49,8 +49,8 @@ mcp-frisk is a linter for that file:
 | Check | What it flags | Status |
 |:---|:---|:---|
 | **Shell shapes** | `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks and `$(...)`, and `;`, `&&` or `\|` in `command` or `args`. Plain `npx -y <pkg>`, `uvx` and `docker run` pass. | Works |
-| **Plaintext secrets** | Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` or args, shown only as prefix plus last four. | Planned |
-| **Report** | Text, or JSON in the Agent Security Suite's agent inventory format, with a non-zero exit above `--fail-on` so a hook or CI job can gate on it. | Text works; JSON and `--fail-on` planned |
+| **Plaintext secrets** | Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` or args, shown only as prefix plus last four, and random-looking strings with no known prefix. | Works |
+| **Report** | Text, or JSON in the Agent Security Suite's agent inventory format, with a non-zero exit at `--fail-on` so a hook or CI job can gate on it. | Works |
 
 ### Rules
 
@@ -60,10 +60,16 @@ mcp-frisk is a linter for that file:
 | `mcp-frisk/command-substitution` | high | A backtick or `$(` anywhere in `command` or `args`. |
 | `mcp-frisk/shell-variable` | medium | A bare `$NAME`. The client-side forms `${NAME}` (Claude Code) and `${env:NAME}` (VS Code) don't fire, nor does a single-quoted or escaped `\$NAME`. |
 | `mcp-frisk/shell-operator` | medium | `;`, `&&`, `\|\|` or `\|` in `command` or `args`. |
+| `mcp-frisk/plaintext-secret` | high | A key in an `env` value or an arg, by its provider's prefix: Anthropic `sk-ant-`, OpenAI `sk-` and `sk-proj-`, Hugging Face `hf_`, AWS `AKIA`/`ASIA`, GitHub `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, `github_pat_`, Stripe `sk_`/`rk_` `live`/`test`. A reference like `${env:GITHUB_TOKEN}` doesn't fire. |
+| `mcp-frisk/high-entropy-string` | low | A string of 20 or more characters in an `env` value or an arg, mixing upper case, lower case and digits, at 4 or more bits of entropy per character. |
 
-The rules are data in [`src/rules.ts`](src/rules.ts), which imports nothing from Node so the
-browser demo can load the same file. Each one has a fixture that fires it and one that doesn't
-in [`tests/fixtures/rules/`](tests/fixtures/rules/).
+The rules are data in [`src/rules.ts`](src/rules.ts) and [`src/secrets.ts`](src/secrets.ts),
+which import nothing from Node so the browser demo can load the same files. Each one has a
+fixture that fires it and one that doesn't in [`tests/fixtures/rules/`](tests/fixtures/rules/).
+The secret fixtures' keys are planted and fake: each one holds `FAKE`.
+
+A key is never printed in full. Text shows the provider's prefix and the last four characters
+(`sk-ant-…aA1b`); JSON holds only a fingerprint, the first 12 hex characters of its SHA-256.
 
 It reads files and nothing else. It never starts or connects to a server, never spawns a
 process, and never sends anything off your machine. The browser demo runs the same rule code
@@ -102,10 +108,13 @@ server entry that isn't one, and a file that can't be read are each reported wit
 ```text
 mcpfrisk [options] [file ...]
 
-  file ...       check just these files instead of discovering configs
-  --home <dir>   read per-user configs from this home folder instead of yours
-  -h, --help     show help
-  -v, --version  print the version
+  file ...              check just these files instead of discovering configs
+  --home <dir>          read per-user configs from this home folder instead of yours
+  --json                print an agent inventory document (schema v0.1), not text
+  --fail-on <severity>  exit 1 if a finding is this severe or worse:
+                        critical, high, medium, low or info
+  -h, --help            show help
+  -v, --version         print the version
 ```
 
 On this repo's fixture `.mcp.json`:
@@ -122,16 +131,53 @@ tests/fixtures/repo/.mcp.json: 2 servers, 2 findings
 2 findings: 1 high, 1 medium.
 ```
 
-The exit code is 0 for now, findings or not, and 2 for a bad flag. `--fail-on` comes with the
-report item.
+On the secret fixture, failing on high:
+
+```text
+$ node dist/cli.js --fail-on high tests/fixtures/rules/plaintext-secret.fires.json
+mcpfrisk 0.0.0: checked 1 location, found 1 config with 6 servers.
+
+tests/fixtures/rules/plaintext-secret.fires.json: 6 servers, 7 findings
+  tests/fixtures/rules/plaintext-secret.fires.json:7   high  mcp-frisk/plaintext-secret  anthropic    Anthropic API key in env ANTHROPIC_API_KEY: sk-ant-…aA1b
+  tests/fixtures/rules/plaintext-secret.fires.json:11  high  mcp-frisk/plaintext-secret  openai       OpenAI API key in args[1]: sk-proj-…cC3d
+  tests/fixtures/rules/plaintext-secret.fires.json:16  high  mcp-frisk/plaintext-secret  huggingface  Hugging Face token in env HF_TOKEN: hf_…eE5f
+  tests/fixtures/rules/plaintext-secret.fires.json:20  high  mcp-frisk/plaintext-secret  aws          AWS access key id in args[4]: AKIA…MPLE
+  tests/fixtures/rules/plaintext-secret.fires.json:26  high  mcp-frisk/plaintext-secret  github       GitHub token in env GITHUB_PERSONAL_ACCESS_TOKEN: ghp_…gG7h
+  tests/fixtures/rules/plaintext-secret.fires.json:27  high  mcp-frisk/plaintext-secret  github       GitHub token in env GITHUB_FINE_GRAINED: github_pat_…iI9j
+  tests/fixtures/rules/plaintext-secret.fires.json:32  high  mcp-frisk/plaintext-secret  stripe       Stripe key in args[2]: sk_test_…kK2l
+
+7 findings: 7 high.
+$ echo $?
+1
+```
+
+The exit code is 1 when `--fail-on` is given and a finding is at or above it, 2 for a bad flag,
+and 0 otherwise, findings or not.
+
+### JSON: the agent inventory
+
+`--json` writes an [agent inventory document](schemas/agent-inventory.schema.json), schema
+v0.1, the format the Agent Security Suite's tools trade. Each server is one identity:
+
+| Field | What mcp-frisk puts there |
+|:---|:---|
+| `id` | `mcp:<config path as shown>#<server name>`, with the project folder before the name for `~/.claude.json` project servers. The same on every run. |
+| `kind`, `platform`, `status` | `mcp-server`, `mcp`, and `unknown`: mcp-frisk reads the config and never checks whether the server runs. |
+| `credentials[]` | One per key found: its type, `location: config-file`, and a `fingerprint` (first 12 hex characters of its SHA-256). Never the key. |
+| `tools[]` | One entry named after the server, with capability tags inferred from the config: `execute-shell` (the command is a shell), `network-egress` (a remote server, or `npx`/`uvx`/`docker run`, which fetch the package at start), `read-secrets` (holds a key, or an `env` name like `*_TOKEN` or `*_KEY`). |
+| `tags` | `transport:stdio` or `transport:remote`, and for discovered configs `client:<name>` and `scope:repo` or `scope:user`. |
+
+Findings carry `ruleId` `mcp-frisk/<rule>` and the evidence line from the text output. What
+the schema has no field for (files checked, unparseable files and entries) goes in `x`.
 
 ## 🗂️ What's in here
 
 | Folder | What's inside |
 |:---|:---|
 | [**📚 docs/**](docs/README.md) | The roadmap, the changelog, the spec and build plan, and ADR-001. |
-| [**🧩 src/**](src/) | The CLI. The parser, rules and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `frisk.ts`, `format.ts`) import nothing from Node, so the browser demo can load them; discovery and file reading (`discover.ts`, `scan.ts`) are Node-only. |
-| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. |
+| [**🧩 src/**](src/) | The CLI. The parser, rules, secret detector and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `secrets.ts`, `frisk.ts`, `format.ts`) import nothing from Node, so the browser demo can load them; discovery, file reading and the JSON report (`discover.ts`, `scan.ts`, `inventory.ts`) are Node-only. |
+| [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, copied unchanged from its published `$id`. |
+| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped. |
 | [**🖥️ site/**](site/) | The demo page and its favicon. A "coming soon" shell for now. |
 
 ## 🛠️ Development

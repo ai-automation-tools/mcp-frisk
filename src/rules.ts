@@ -14,6 +14,8 @@ export interface Finding {
   /** `mcp-frisk/<rule>`. */
   ruleId: string;
   severity: Severity;
+  /** The rule's title, the same for every finding of that rule. */
+  title: string;
   server: string;
   scope?: string;
   line: number;
@@ -177,7 +179,7 @@ export function lintServer(server: ServerEntry, rules: Rule[] = RULES): LintResu
 
   const findings: Finding[] = [];
   const add = (rule: Rule, severity: Severity, at: number, message: string) =>
-    findings.push({ ruleId: `mcp-frisk/${rule.id}`, severity, server: server.name, scope: server.scope, line: at, message });
+    findings.push({ ruleId: `mcp-frisk/${rule.id}`, severity, title: rule.title, server: server.name, scope: server.scope, line: at, message });
 
   for (const rule of rules) {
     if (rule.kind === "shell-wrapper") {

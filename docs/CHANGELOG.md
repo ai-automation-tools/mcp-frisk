@@ -16,6 +16,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 ## Unreleased
 
 **Added**
+- Secrets and the inventory report. Two new rules: `plaintext-secret` (high) names Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` values and args, and `high-entropy-string` (low) flags random-looking strings with no known prefix; text shows a key only as prefix plus last four. `--json` writes an agent inventory document (schema v0.1, vendored to `schemas/agent-inventory.schema.json`): one `mcp-server` identity per server with a stable id, capability tags, credentials by SHA-256 fingerprint only, and `mcp-frisk/<rule>` findings. `--fail-on <severity>` exits 1 when a finding meets it. Tests validate the JSON against the schema, check every output for the planted keys, and run the CLI with sockets, DNS and child processes trapped. A `.gitleaks.toml` allows the planted fixture keys, which all hold `FAKE`. *Slice 2: Secrets and report*
 - `mcpfrisk` finds MCP configs in the current repo (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`) and the user's home (Claude Code, Claude Desktop, Cursor, VS Code) on Windows, macOS and Linux paths, parses them as JSONC, and flags shell-injection shapes with four rules (`shell-wrapper`, `command-substitution`, `shell-variable`, `shell-operator`) while `npx -y`, `uvx` and `docker run` pass. Each finding names its rule, server, file and line; unparseable files and entries and unreadable files get a reason. CI now runs on Ubuntu and Windows. *Slice 1: Frisk a config*
 
 **Docs**
