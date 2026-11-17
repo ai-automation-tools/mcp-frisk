@@ -36,6 +36,13 @@ binary). What the repo-borne cases have in common is simpler: **a config in the 
 server, and a project setting or a client bug starts it without a real review.** That signal
 is not one of the planned rules; it's raised as an [open question](OPEN-QUESTIONS.md).
 
+**Since Slice 1b (2026-11-16, Mike's answer to that question):** three rules aim at that signal.
+`project-server` (info) marks every server a repo config defines, `inline-code` (high) catches
+TrustFall's `node -e` payload, and `auto-enable` (high) fires on `enableAllProjectMcpServers` or
+`enabledMcpjsonServers` in a repo's `.claude/settings.json`. TrustFall's shape is now caught
+three ways (fixture: `tests/fixtures/trustfall/`), and CVE-2026-47751 and CVE-2026-57860 at
+least get the `project-server` finding whatever the payload. Miasma stays out of scope.
+
 ## TrustFall
 
 - **Source:** Adversa AI, 2026-05-07,

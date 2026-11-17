@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "node-script": { "command": "node", "args": ["server.js", "-e", "production"] },
+    "node-flags": { "command": "node", "args": ["--inspect", "dist/server.js"] },
+    "node-check": { "command": "node", "args": ["-c", "server.js"] },
+    "python-module": { "command": "python", "args": ["-m", "fixture_server", "-c", "config.toml"] },
+    "python-script": { "command": "python3", "args": ["server.py", "-c", "config.toml"] },
+    "deno-run": { "command": "deno", "args": ["run", "--allow-read", "server.ts", "eval"] },
+    "bun-run": { "command": "bun", "args": ["run", "server.ts", "-e"] },
+    "ruby-script": { "command": "ruby", "args": ["server.rb", "-e", "dev"] },
+    "php-script": { "command": "php", "args": ["server.php", "-r"] },
+    "remote": { "type": "http", "url": "https://mcp.example.test/mcp" }
+  }
+}

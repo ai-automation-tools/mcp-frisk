@@ -45,7 +45,7 @@ test("--json over the fixture repo and home validates against the agent inventor
   assert.equal(doc.generatedAt, "2026-11-13T00:00:00.000Z");
   assert.equal(doc.producer.name, "mcp-frisk");
   assert.equal(doc.identities.length, 10);
-  assert.equal(doc.x.checked, 8);
+  assert.equal(doc.x.checked, 10);
   for (const id of doc.identities) {
     assert.equal(id.kind, "mcp-server");
     assert.equal(id.platform, "mcp");
@@ -58,6 +58,7 @@ test("--json over the fixture repo and home validates against the agent inventor
   assert.deepEqual(
     doc.findings.filter((f) => f.identityId === helper.id).map((f) => [f.id, f.ruleId, f.severity]),
     [
+      ["mcp:.mcp.json#build-helper#mcp-frisk/project-server/1", "mcp-frisk/project-server", "info"],
       ["mcp:.mcp.json#build-helper#mcp-frisk/shell-wrapper/1", "mcp-frisk/shell-wrapper", "high"],
       ["mcp:.mcp.json#build-helper#mcp-frisk/shell-operator/1", "mcp-frisk/shell-operator", "medium"],
     ],
@@ -70,6 +71,15 @@ test("every fixture's report validates, edge cases included", () => {
   const edge = inventory(["empty.json", "malformed.json", "bad-entries.json", "absent.json"], join(fixtures, "edge"));
   assertValid(edge);
   assert.deepEqual(edge.x.files.map((f) => f.status), ["ok", "unparseable", "ok", "unreadable"]);
+});
+
+test("a repo whose settings auto-start its servers validates, the settings file as its own identity", () => {
+  const doc = inventory(["--home", join(fixtures, "no-such-home")], join(fixtures, "trustfall"));
+  assertValid(doc);
+  assert.deepEqual(doc.identities.map((i) => [i.id, i.kind]), [
+    ["mcp:.mcp.json#project-helper", "mcp-server"],
+    ["mcp:.claude/settings.json", "other"],
+  ]);
 });
 
 test("ids are the same from run to run", () => {

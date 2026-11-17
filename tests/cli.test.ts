@@ -17,14 +17,15 @@ test("a run over the fixture repo and home lists findings as file:line, severity
   const r = run({ ...base, argv: [] });
   assert.equal(r.code, 0);
   assert.equal(r.stderr, "");
-  assert.match(r.stdout, /^mcpfrisk \d+\.\d+\.\d+: checked 8 locations, found 7 configs with 10 servers\./);
+  assert.match(r.stdout, /^mcpfrisk \d+\.\d+\.\d+: checked 10 locations, found 7 configs with 10 servers\./);
   assert.match(r.stdout, /\.mcp\.json:9 +high +mcp-frisk\/shell-wrapper +build-helper +"bash -c"/);
   assert.match(r.stdout, /\.cursor\/mcp\.json:3 +medium +mcp-frisk\/shell-variable +notes +unquoted shell variable "\$HOME"/);
   assert.match(r.stdout, /~\/\.claude\.json:9 +high +mcp-frisk\/shell-wrapper +project-db \[project \/home\/fixture\/work\/app\]/);
   assert.match(r.stdout, /~\/\.config\/Claude\/claude_desktop_config\.json \(Claude Desktop, user\): 1 server, 0 findings/);
-  assert.match(r.stdout, /no findings: filesystem \(npx -y <pkg>\)/);
-  assert.match(r.stdout, /no findings: docs-search \(remote\), fetch \(uvx <pkg>\)/);
-  assert.match(r.stdout, /\n6 findings: 3 high, 3 medium\.\n$/);
+  assert.match(r.stdout, /\.mcp\.json:4 +info +mcp-frisk\/project-server +filesystem +the repo ships this server: the client runs "npx"/);
+  assert.match(r.stdout, /no findings: docs-search \(remote\)\n/);
+  assert.match(r.stdout, /no findings: user-memory \(npx -y <pkg>\)/);
+  assert.match(r.stdout, /\n10 findings: 3 high, 3 medium, 4 info\.\n$/);
 });
 
 test("named files replace discovery, and edge cases print a reason", () => {
