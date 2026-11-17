@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "packaged": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "."] },
+    "local-script": { "command": "node", "args": ["tools/mcp-server.js"] },
+    "binary": { "command": "./bin/fixture-server" }
+  }
+}

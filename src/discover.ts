@@ -14,7 +14,7 @@ export interface Candidate {
 }
 
 export interface DiscoverOptions {
-  /** The repo to check: `.mcp.json`, `.vscode/mcp.json` and `.cursor/mcp.json` are read from here. */
+  /** The repo to check: `.mcp.json`, `.claude/settings*.json`, `.vscode/mcp.json` and `.cursor/mcp.json` are read from here. */
   cwd: string;
   /** The user's home folder. */
   home: string;
@@ -36,6 +36,9 @@ export function candidatePaths(opts: DiscoverOptions): Candidate[] {
   const appData = appDataDir(opts);
   const list: Candidate[] = [
     { path: join(cwd, ".mcp.json"), client: "Claude Code", scope: "repo" },
+    // Not MCP configs, but they decide whether `.mcp.json` starts with no prompt (auto-enable).
+    { path: join(cwd, ".claude", "settings.json"), client: "Claude Code", scope: "repo" },
+    { path: join(cwd, ".claude", "settings.local.json"), client: "Claude Code", scope: "repo" },
     { path: join(cwd, ".vscode", "mcp.json"), client: "VS Code", scope: "repo" },
     { path: join(cwd, ".cursor", "mcp.json"), client: "Cursor", scope: "repo" },
     { path: join(home, ".claude.json"), client: "Claude Code", scope: "user" },

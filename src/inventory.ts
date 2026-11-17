@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import type { FileReport } from "./scan.ts";
 import type { ServerReport } from "./frisk.ts";
 import { argv, exeName, RULES } from "./rules.ts";
-import type { Severity } from "./rules.ts";
+import type { Finding, Severity } from "./rules.ts";
 import type { CredentialType } from "./secrets.ts";
 
 export const SCHEMA_ID = "https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json";
@@ -22,7 +22,8 @@ export interface Inventory {
   producer: { name: string; version: string; url: string };
   identities: {
     id: string;
-    kind: "mcp-server";
+    /** `other` only for a settings file that auto-starts servers (`auto-enable`). */
+    kind: "mcp-server" | "other";
     platform: "mcp";
     displayName: string;
     status: "unknown";
@@ -43,7 +44,7 @@ export interface InventoryOptions {
   display: (path: string) => string;
 }
 
-const SHELLS = new Set(RULES.flatMap((r) => (r.kind === "shell-wrapper" ? r.families.flatMap((f) => f.names) : [])));
+const SHELLS = new Set(RULES.flatMap((r) => (r.id === "shell-wrapper" && r.kind === "code-flag" ? r.families.flatMap((f) => f.names) : [])));
 const SECRET_NAME = /KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|AUTH/i;
 
 export function buildInventory(reports: FileReport[], opts: InventoryOptions): Inventory {
@@ -66,8 +67,46 @@ export function buildInventory(reports: FileReport[], opts: InventoryOptions): I
       ...(r.problems.length > 0 ? { problems: r.problems } : {}),
     });
     for (const s of r.servers) addServer(inv, file, r, s);
+    if (r.settings.length > 0) addSettings(inv, file, r);
   }
   return inv;
+}
+
+/** A settings file that auto-starts servers holds no server itself, so it is its own identity. */
+function addSettings(inv: Inventory, file: string, r: FileReport): void {
+  const id = `mcp:${file}`;
+  inv.identities.push({
+    id,
+    kind: "other",
+    platform: "mcp",
+    displayName: `${file} (project settings)`,
+    status: "unknown",
+    credentials: [],
+    tools: [],
+    tags: [...scopeTags(r), "settings"],
+  });
+  addFindings(inv, file, id, r.settings);
+}
+
+function scopeTags(r: FileReport): string[] {
+  return r.scope === "given" ? [] : [`client:${r.client}`, `scope:${r.scope}`];
+}
+
+function addFindings(inv: Inventory, file: string, id: string, findings: Finding[]): void {
+  const seen = new Map<string, number>();
+  for (const f of findings) {
+    const n = (seen.get(f.ruleId) ?? 0) + 1;
+    seen.set(f.ruleId, n);
+    inv.findings.push({
+      id: `${id}#${f.ruleId}/${n}`,
+      identityId: id,
+      ruleId: f.ruleId,
+      severity: f.severity,
+      title: f.title,
+      evidence: `${file}:${f.line}: ${f.message}`,
+      status: "open",
+    });
+  }
 }
 
 function addServer(inv: Inventory, file: string, r: FileReport, s: ServerReport): void {
@@ -93,23 +132,9 @@ function addServer(inv: Inventory, file: string, r: FileReport, s: ServerReport)
       location: "config-file",
     })),
     tools: [{ name: server.name, capabilities }],
-    tags: [...(r.scope === "given" ? [] : [`client:${r.client}`, `scope:${r.scope}`]), `transport:${server.transport}`],
+    tags: [...scopeTags(r), `transport:${server.transport}`],
   });
-
-  const seen = new Map<string, number>();
-  for (const f of s.findings) {
-    const n = (seen.get(f.ruleId) ?? 0) + 1;
-    seen.set(f.ruleId, n);
-    inv.findings.push({
-      id: `${id}#${f.ruleId}/${n}`,
-      identityId: id,
-      ruleId: f.ruleId,
-      severity: f.severity,
-      title: f.title,
-      evidence: `${file}:${f.line}: ${f.message}`,
-      status: "open",
-    });
-  }
+  addFindings(inv, file, id, s.findings);
 }
 
 /** First 12 hex characters of the SHA-256 of the secret: the schema's fingerprint. */

@@ -1,0 +1,9 @@
+{
+  "permissions": { "allow": ["Bash(npm test)"] },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
+  "disabledMcpjsonServers": ["notes"],
+  "projects": {
+    "/home/fixture/work/app": { "enableAllProjectMcpServers": true, "enabledMcpjsonServers": ["notes"] }
+  }
+}

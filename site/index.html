@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>mcp-frisk: lint an MCP config without running it</title>
-  <meta name="description" content="An offline linter for MCP configs: flags shell-injection shapes and plaintext secrets without starting any server.">
+  <meta name="description" content="An offline linter for MCP configs: flags shell-injection shapes, inline code, plaintext secrets and auto-start settings without starting any server.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root { color-scheme: dark; --bg: #060606; --surface: #0b0b0c; --line: #18181b; --fg: #fafafa; --mid: #a1a1aa; --dim: #71717a; --accent: #cbd5e1; }
@@ -44,7 +44,7 @@
   <div class="card">
     <img src="favicon.svg" alt="mcp-frisk icon: a magnifying glass">
     <h1>Lint an MCP config without running it</h1>
-    <p>mcp-frisk reads the MCP config files your coding agents load (<code>.mcp.json</code>, Claude Desktop, Cursor, VS Code) and flags two things: <code>command</code> and <code>args</code> shaped like shell injection, and API keys sitting in plain text. It never starts a server and never makes a network call.</p>
+    <p>mcp-frisk reads the MCP config files your coding agents load (<code>.mcp.json</code>, Claude Desktop, Cursor, VS Code) and flags <code>command</code> and <code>args</code> shaped like shell injection or carrying inline code, API keys sitting in plain text, and project settings that start a repo's servers without asking. It never starts a server and never makes a network call.</p>
     <p>This page will let you paste a config and see the findings, using the same rule code as the CLI.</p>
     <span class="soon">coming soon</span>
   </div>

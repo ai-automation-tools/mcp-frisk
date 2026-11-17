@@ -15,6 +15,7 @@
 ## Slice 1 - Frisk a config (MVP feature 1, ~4 runs)
 
 - **Delivers:** discovery and parsing for Claude Code, Claude Desktop, Cursor, VS Code and repo `.mcp.json`; the shell-injection rule set with fixtures and an allow-shape list.
+- **Added 2026-11-16 (Slice 1b, Mike's answer in [OPEN-QUESTIONS](../OPEN-QUESTIONS.md)):** an info finding for a project config that defines an executable server, an inline-code rule (`node -e`, `python -c`), and a high finding when a repo's `.claude/settings.json` auto-enables project servers.
 - **De-risks:** the schedule owner and the false-positive risk (every shipped rule needs a passing and failing fixture).
 - **Done when:** the spec's discovery and rule ACs pass against fixtures on Windows and Linux CI.
 

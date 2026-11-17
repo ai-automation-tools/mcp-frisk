@@ -1,9 +1,13 @@
-// The shell-injection rules, as data, and the engine that applies them to one server entry.
+// The command-line rules (shell injection, inline code), as data, and the engine that applies
+// them to one server entry; then the rules that need context: a server in a project config, and
+// project settings that auto-start servers.
 //
 // Browser-safe: no Node imports (ADR-001). The CLI and the demo both load this module.
 // Messages quote only the matched token (a shell name, a flag, an operator, a variable name cut
 // to a safe length), never a whole argument, so a key sitting in an arg is never echoed.
 
+import { getEntry } from "./jsonc.ts";
+import type { JsonNode } from "./jsonc.ts";
 import type { ServerEntry, StringAt } from "./servers.ts";
 
 /** The agent inventory schema's severity scale. */
@@ -22,24 +26,26 @@ export interface Finding {
   message: string;
 }
 
-/** A shell launched with its "run this string" flag, e.g. `bash -c`, `cmd /c`. */
-export interface ShellFamily {
+/** A program launched with its "run this string" flag, e.g. `bash -c`, `cmd /c`, `node -e`. */
+export interface CodeFlagFamily {
   /** Executable names, lower case, without `.exe`. */
   names: string[];
-  /** Regex source for the flag that makes the shell run its argument as code. Case-insensitive. */
+  /** Regex source for the flag that makes the program run its argument as code. Case-insensitive. */
   flag: string;
-  /** Regex source for the arg after which the shell's own flags end. Case-insensitive. */
+  /** Regex source for the arg after which the program's own flags end. Case-insensitive. */
   stopAt: string;
   /** When the wrapped command is a known launcher shape, report at this severity instead. */
   wrappingAllowShape?: { severity: Severity; note: string };
 }
 
-export interface ShellWrapperRule {
-  kind: "shell-wrapper";
+export interface CodeFlagRule {
+  kind: "code-flag";
   id: string;
   severity: Severity;
   title: string;
-  families: ShellFamily[];
+  /** `{run}` is the program and flag, e.g. `"bash -c"`. */
+  message: string;
+  families: CodeFlagFamily[];
 }
 
 /** A regex run over `command` and every arg. `{match}` in the message is the matched text. */
@@ -54,7 +60,7 @@ export interface PatternRule {
   skipSingleQuoted?: boolean;
 }
 
-export type Rule = ShellWrapperRule | PatternRule;
+export type Rule = CodeFlagRule | PatternRule;
 
 /** A launcher that runs a package without a shell. A server in one of these shapes gets no finding. */
 export interface AllowShape {
@@ -77,10 +83,11 @@ export const ALLOW_SHAPES: AllowShape[] = [
 
 export const RULES: Rule[] = [
   {
-    kind: "shell-wrapper",
+    kind: "code-flag",
     id: "shell-wrapper",
     severity: "high",
     title: "Server starts a shell that runs a string as code",
+    message: "{run} hands the rest of the command line to a shell to run as code",
     families: [
       {
         names: ["sh", "bash", "zsh", "dash", "ksh", "ash", "fish"],
@@ -101,6 +108,21 @@ export const RULES: Rule[] = [
         flag: "^-(c|command|e|ec|enc|encodedcommand)$",
         stopAt: "^-(f|file)$",
       },
+    ],
+  },
+  {
+    // TrustFall's proof of concept: `node -e <code>`. The program is in the config, not a package.
+    kind: "code-flag",
+    id: "inline-code",
+    severity: "high",
+    title: "Server runs inline code written into the config",
+    message: "{run} runs the next argument as a program, so the config itself holds the code",
+    families: [
+      { names: ["node", "nodejs", "bun"], flag: "^(-e|-p|-pe|--eval|--print)(=.*)?$", stopAt: "^[^-]" },
+      { names: ["python", "python3", "python2", "py", "pythonw"], flag: "^-[a-z]*c$", stopAt: "^([^-]|-m$)" },
+      { names: ["deno"], flag: "^eval$", stopAt: "^[^-]" },
+      { names: ["ruby", "perl"], flag: "^-[a-z]*e$", stopAt: "^[^-]" },
+      { names: ["php"], flag: "^-r$", stopAt: "^[^-]" },
     ],
   },
   {
@@ -182,8 +204,8 @@ export function lintServer(server: ServerEntry, rules: Rule[] = RULES): LintResu
     findings.push({ ruleId: `mcp-frisk/${rule.id}`, severity, title: rule.title, server: server.name, scope: server.scope, line: at, message });
 
   for (const rule of rules) {
-    if (rule.kind === "shell-wrapper") {
-      const hit = shellWrapper(rule, line);
+    if (rule.kind === "code-flag") {
+      const hit = codeFlag(rule, line);
       if (hit) add(rule, hit.severity, hit.line, hit.message);
       continue;
     }
@@ -202,7 +224,7 @@ export function lintServer(server: ServerEntry, rules: Rule[] = RULES): LintResu
   return { findings };
 }
 
-function shellWrapper(rule: ShellWrapperRule, line: StringAt[]): { severity: Severity; line: number; message: string } | undefined {
+function codeFlag(rule: CodeFlagRule, line: StringAt[]): { severity: Severity; line: number; message: string } | undefined {
   const exe = exeName(line[0].value);
   const family = rule.families.find((f) => f.names.includes(exe));
   if (!family) return undefined;
@@ -212,7 +234,8 @@ function shellWrapper(rule: ShellWrapperRule, line: StringAt[]): { severity: Sev
     const arg = line[i].value;
     if (flag.test(arg)) {
       const shape = family.wrappingAllowShape ? matchAllowShape(line.slice(i + 1)) : undefined;
-      const base = `"${exe} ${arg.toLowerCase()}" hands the rest of the command line to a shell to run as code`;
+      // Only the flag's name: `--eval=<code>` must not echo the code, which may hold a key.
+      const base = rule.message.replace("{run}", `"${exe} ${arg.split("=")[0].toLowerCase()}"`);
       if (shape && family.wrappingAllowShape) {
         return { severity: family.wrappingAllowShape.severity, line: line[i].line, message: `${base}; wrapping ${shape.label} is ${family.wrappingAllowShape.note}` };
       }
@@ -227,4 +250,59 @@ function shellWrapper(rule: ShellWrapperRule, line: StringAt[]): { severity: Sev
 function quote(token: string): string {
   const cut = token.length > 20 ? `${token.slice(0, 16)}…` : token;
   return `"${cut}"`;
+}
+
+/** The rules that look past one server entry: where the config lives, and what starts it. */
+export const CONTEXT_RULES = {
+  projectServer: {
+    id: "project-server",
+    severity: "info",
+    title: "Project config defines a server that runs a local command",
+  },
+  autoEnable: {
+    id: "auto-enable",
+    severity: "high",
+    title: "Project settings start the repo's MCP servers without asking",
+  },
+} as const satisfies Record<string, { id: string; severity: Severity; title: string }>;
+
+/**
+ * A repo's `.mcp.json` (or `.vscode/`, `.cursor/` mcp.json) that defines a stdio server: whoever
+ * clones the repo runs that command once the client enables the project's servers. Every repo-borne
+ * attack in docs/threat-model.md has this shape, whatever the command looks like.
+ */
+export function projectServerFinding(server: ServerEntry): Finding | undefined {
+  if (server.transport !== "stdio" || !server.command) return undefined;
+  const { id, severity, title } = CONTEXT_RULES.projectServer;
+  const exe = quote(exeName(argv(server)[0]?.value ?? server.command.value));
+  return {
+    ruleId: `mcp-frisk/${id}`, severity, title, server: server.name, scope: server.scope, line: server.command.line,
+    message: `the repo ships this server: the client runs ${exe} on this machine once project servers are enabled`,
+  };
+}
+
+/**
+ * Claude Code settings (`.claude/settings.json`) that start project servers with no prompt:
+ * `enableAllProjectMcpServers: true`, or a list in `enabledMcpjsonServers`. TrustFall pairs one
+ * of these with a `.mcp.json`. Only top-level keys count: `~/.claude.json` keeps the same keys
+ * under `projects.<path>`, where they record the user's own approvals.
+ */
+export function autoEnableFindings(root: JsonNode | undefined): Finding[] {
+  const { id, severity, title } = CONTEXT_RULES.autoEnable;
+  const finding = (setting: string, line: number, message: string): Finding =>
+    ({ ruleId: `mcp-frisk/${id}`, severity, title, server: setting, line, message });
+  const out: Finding[] = [];
+  const all = getEntry(root, "enableAllProjectMcpServers");
+  if (all?.value.type === "boolean" && all.value.value) {
+    out.push(finding(all.key, all.value.line, "Claude Code starts every server in this repo's .mcp.json without asking"));
+  }
+  const list = getEntry(root, "enabledMcpjsonServers");
+  if (list?.value.type === "array") {
+    const names = list.value.items.flatMap((n) => (n.type === "string" ? [quote(n.value)] : []));
+    if (names.length > 0) {
+      const shown = names.length > 5 ? `${names.slice(0, 5).join(", ")} and ${names.length - 5} more` : names.join(", ");
+      out.push(finding(list.key, list.value.line, `Claude Code starts ${names.length} ${names.length === 1 ? "server" : "servers"} from this repo's .mcp.json without asking: ${shown}`));
+    }
+  }
+  return out;
 }
