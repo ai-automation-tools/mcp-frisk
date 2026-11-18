@@ -15,12 +15,14 @@ function rel(base: string, path: string): string {
   return relative(base, path).split(sep).join("/");
 }
 
-test("repo configs: .mcp.json, .vscode/mcp.json and .cursor/mcp.json", () => {
+test("repo configs: .mcp.json, .claude/settings*.json, .vscode/mcp.json and .cursor/mcp.json", () => {
   const list = candidatePaths({ cwd: repo, home: join(fixtures, "homes", "linux"), platform: "linux", env: {} });
   assert.deepEqual(
     list.filter((c) => c.scope === "repo").map((c) => [rel(repo, c.path), c.client]),
     [
       [".mcp.json", "Claude Code"],
+      [".claude/settings.json", "Claude Code"],
+      [".claude/settings.local.json", "Claude Code"],
       [".vscode/mcp.json", "VS Code"],
       [".cursor/mcp.json", "Cursor"],
     ],

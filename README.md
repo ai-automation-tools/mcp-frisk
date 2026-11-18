@@ -3,7 +3,7 @@
 <h1 align="center">🔎 mcp-frisk</h1>
 
 <p align="center">
-  <em>Reads every MCP config your coding agents load and flags shell-injection shapes and plaintext keys,<br>without starting a single server or making a network call.</em>
+  <em>Reads every MCP config your coding agents load and flags shell-injection shapes, inline code, plaintext keys<br>and project settings that start servers unasked, without starting a single server or making a network call.</em>
 </p>
 
 <p align="center">
@@ -34,7 +34,8 @@
 
 > [!WARNING]
 > **Not released yet.** The `mcpfrisk` CLI works: it finds MCP configs, flags shell-injection
-> shapes and plaintext keys, and writes text or an agent inventory JSON report. The browser demo
+> shapes, inline code, plaintext keys and auto-start settings, and writes text or an agent
+> inventory JSON report. The browser demo
 > is next. The [roadmap](docs/ROADMAP.md) says what's left before release.
 
 ## 🎯 What it's for
@@ -49,6 +50,7 @@ mcp-frisk is a linter for that file:
 | Check | What it flags | Status |
 |:---|:---|:---|
 | **Shell shapes** | `sh -c`, `bash -c`, `cmd /c`, `powershell -c`, unquoted `$VAR`, backticks and `$(...)`, and `;`, `&&` or `\|` in `command` or `args`. Plain `npx -y <pkg>`, `uvx` and `docker run` pass. | Works |
+| **Repo-borne servers** | A server defined in the repo's own config (it runs on the machine of whoever clones it), inline code such as `node -e` or `python -c` (TrustFall's payload), and `.claude/settings.json` turning on `enableAllProjectMcpServers` or `enabledMcpjsonServers`, which starts those servers with no prompt. See the [threat model](docs/threat-model.md). | Works |
 | **Plaintext secrets** | Anthropic, OpenAI, Hugging Face, AWS, GitHub and Stripe keys in `env` or args, shown only as prefix plus last four, and random-looking strings with no known prefix. | Works |
 | **Report** | Text, or JSON in the Agent Security Suite's agent inventory format, with a non-zero exit at `--fail-on` so a hook or CI job can gate on it. | Works |
 
@@ -57,6 +59,9 @@ mcp-frisk is a linter for that file:
 | Rule id | Severity | Fires on |
 |:---|:---|:---|
 | `mcp-frisk/shell-wrapper` | high | A shell started with its run-this-string flag: `sh`/`bash`/`zsh` `-c` (and `-lc`), `cmd /c` or `/k`, `powershell`/`pwsh` `-c`, `-Command` or `-EncodedCommand`. An `/usr/bin/env` prefix is seen through. `cmd /c npx -y <pkg>`, the usual Windows launcher, is reported as low. |
+| `mcp-frisk/inline-code` | high | An interpreter handed its program as an arg: `node`/`bun` `-e`, `-p` or `--eval`, `python` `-c`, `deno eval`, `ruby`/`perl` `-e`, `php -r`. |
+| `mcp-frisk/auto-enable` | high | A Claude Code settings file (`.claude/settings.json` or `settings.local.json`) with `enableAllProjectMcpServers: true` or a non-empty `enabledMcpjsonServers` at the top level, so the repo's `.mcp.json` servers start without asking. The same keys under `projects.<path>` in `~/.claude.json` are your own approvals and don't fire. |
+| `mcp-frisk/project-server` | info | A server with a local `command` in a repo config found by discovery (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`). Whatever the command looks like, it runs on the machine of whoever clones the repo once project servers are enabled. Not raised for files named on the command line, whose origin mcp-frisk can't tell. |
 | `mcp-frisk/command-substitution` | high | A backtick or `$(` anywhere in `command` or `args`. |
 | `mcp-frisk/shell-variable` | medium | A bare `$NAME`. The client-side forms `${NAME}` (Claude Code) and `${env:NAME}` (VS Code) don't fire, nor does a single-quoted or escaped `\$NAME`. |
 | `mcp-frisk/shell-operator` | medium | `;`, `&&`, `\|\|` or `\|` in `command` or `args`. |
@@ -65,7 +70,8 @@ mcp-frisk is a linter for that file:
 
 The rules are data in [`src/rules.ts`](src/rules.ts) and [`src/secrets.ts`](src/secrets.ts),
 which import nothing from Node so the browser demo can load the same files. Each one has a
-fixture that fires it and one that doesn't in [`tests/fixtures/rules/`](tests/fixtures/rules/).
+fixture that fires it and one that doesn't in [`tests/fixtures/rules/`](tests/fixtures/rules/),
+and [`tests/fixtures/trustfall/`](tests/fixtures/trustfall/) is a repo in TrustFall's shape.
 The secret fixtures' keys are planted and fake: each one holds `FAKE`.
 
 A key is never printed in full. Text shows the provider's prefix and the last four characters
@@ -92,8 +98,9 @@ npm run build        # compiles src/ to dist/
 node dist/cli.js     # frisks this folder's MCP configs and your own
 ```
 
-With no arguments it checks the current folder's `.mcp.json`, `.vscode/mcp.json` and
-`.cursor/mcp.json`, then the per-user configs:
+With no arguments it checks the current folder's `.mcp.json`, `.claude/settings.json`,
+`.claude/settings.local.json`, `.vscode/mcp.json` and `.cursor/mcp.json`, then the per-user
+configs:
 
 | Client | Windows | macOS | Linux |
 |:---|:---|:---|:---|
@@ -151,6 +158,23 @@ $ echo $?
 1
 ```
 
+In a repo shaped like TrustFall, a `node -e` server plus a settings file that auto-enables it
+(run from `tests/fixtures/trustfall/`, with an empty home):
+
+```text
+$ node ../../../dist/cli.js --home ../no-such-home --fail-on high
+mcpfrisk 0.0.0: checked 10 locations, found 2 configs with 1 server.
+
+.mcp.json (Claude Code, repo): 1 server, 2 findings
+  .mcp.json:4  info  mcp-frisk/project-server  project-helper  the repo ships this server: the client runs "node" on this machine once project servers are enabled
+  .mcp.json:5  high  mcp-frisk/inline-code     project-helper  "node -e" runs the next argument as a program, so the config itself holds the code
+
+.claude/settings.json (Claude Code, repo): 0 servers, 1 finding
+  .claude/settings.json:2  high  mcp-frisk/auto-enable  enableAllProjectMcpServers  Claude Code starts every server in this repo's .mcp.json without asking
+
+3 findings: 2 high, 1 info.
+```
+
 The exit code is 1 when `--fail-on` is given and a finding is at or above it, 2 for a bad flag,
 and 0 otherwise, findings or not.
 
@@ -167,6 +191,9 @@ v0.1, the format the Agent Security Suite's tools trade. Each server is one iden
 | `tools[]` | One entry named after the server, with capability tags inferred from the config: `execute-shell` (the command is a shell), `network-egress` (a remote server, or `npx`/`uvx`/`docker run`, which fetch the package at start), `read-secrets` (holds a key, or an `env` name like `*_TOKEN` or `*_KEY`). |
 | `tags` | `transport:stdio` or `transport:remote`, and for discovered configs `client:<name>` and `scope:repo` or `scope:user`. |
 
+A settings file with an `auto-enable` finding defines no server, so it gets an identity of its
+own: `id` `mcp:<path>`, `kind: other`, tagged `settings`, holding that finding.
+
 Findings carry `ruleId` `mcp-frisk/<rule>` and the evidence line from the text output. What
 the schema has no field for (files checked, unparseable files and entries) goes in `x`.
 
@@ -177,7 +204,7 @@ the schema has no field for (files checked, unparseable files and entries) goes 
 | [**📚 docs/**](docs/README.md) | The roadmap, the changelog, the spec and build plan, and ADR-001. |
 | [**🧩 src/**](src/) | The CLI. The parser, rules, secret detector and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `secrets.ts`, `frisk.ts`, `format.ts`) import nothing from Node, so the browser demo can load them; discovery, file reading and the JSON report (`discover.ts`, `scan.ts`, `inventory.ts`) are Node-only. |
 | [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, copied unchanged from its published `$id`. |
-| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped. |
+| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, a TrustFall-shaped repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped. |
 | [**🖥️ site/**](site/) | The demo page and its favicon. A "coming soon" shell for now. |
 
 ## 🛠️ Development

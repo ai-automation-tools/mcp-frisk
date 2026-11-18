@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "node-e": { "command": "node", "args": ["-e", "require('./fixture-server.js')"] },
+    "node-eval-equals": { "command": "node", "args": ["--eval=console.log(1)"] },
+    "node-pe": { "command": "/usr/local/bin/node", "args": ["--no-warnings", "-pe", "process.version"] },
+    "nodejs-print": { "command": "nodejs", "args": ["--print", "1 + 1"] },
+    "bun-e": { "command": "bun", "args": ["-e", "console.log(1)"] },
+    "python-c": { "command": "python", "args": ["-c", "print('fixture')"] },
+    "python3-Ic": { "command": "python3", "args": ["-Ic", "print('fixture')"] },
+    "py-launcher": { "command": "py.exe", "args": ["-3", "-c", "print('fixture')"] },
+    "deno-eval": { "command": "deno", "args": ["eval", "console.log(1)"] },
+    "ruby-e": { "command": "ruby", "args": ["-e", "puts 1"] },
+    "perl-E": { "command": "perl", "args": ["-E", "say 1"] },
+    "php-r": { "command": "php", "args": ["-r", "echo 1;"] },
+    "env-prefix": { "command": "/usr/bin/env", "args": ["FOO=1", "node", "-e", "console.log(1)"] }
+  }
+}

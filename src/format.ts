@@ -34,7 +34,7 @@ export function formatText(reports: FileReport[], opts: FormatOptions): string {
       out.push(`${where}: unparseable at line ${r.line}, ${clean(r.reason)}`);
       continue;
     }
-    if (r.empty || (r.servers.length === 0 && r.problems.length === 0)) {
+    if (r.empty || (r.servers.length === 0 && r.problems.length === 0 && r.findings.length === 0)) {
       out.push(`${where}: ${r.empty ? "empty file" : "no MCP servers"}`);
       continue;
     }

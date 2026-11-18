@@ -4,8 +4,8 @@
 // will call it on a pasted config.
 
 import { parseJsonc } from "./jsonc.ts";
-import { lintServer, RULES } from "./rules.ts";
-import type { Finding, Rule } from "./rules.ts";
+import { autoEnableFindings, lintServer, projectServerFinding } from "./rules.ts";
+import type { Finding } from "./rules.ts";
 import { findSecrets, secretFindings } from "./secrets.ts";
 import type { SecretHit } from "./secrets.ts";
 import { extractServers } from "./servers.ts";
@@ -22,24 +22,35 @@ export interface ServerReport {
 }
 
 export type FriskResult =
-  | { status: "ok"; empty: boolean; servers: ServerReport[]; problems: EntryProblem[]; findings: Finding[] }
-  | { status: "unparseable"; reason: string; line: number; servers: []; problems: []; findings: [] };
+  | {
+    status: "ok"; empty: boolean; servers: ServerReport[]; problems: EntryProblem[]; findings: Finding[];
+    /** Findings about the file's own settings, tied to no server. Also in `findings`. */
+    settings: Finding[];
+  }
+  | { status: "unparseable"; reason: string; line: number; servers: []; problems: []; findings: []; settings: [] };
 
-export function friskText(text: string, rules: Rule[] = RULES): FriskResult {
+export interface FriskOptions {
+  /** The file is a repo's own config (`.mcp.json` and the like), shipped to whoever clones it. */
+  project?: boolean;
+}
+
+export function friskText(text: string, opts: FriskOptions = {}): FriskResult {
   const parsed = parseJsonc(text);
   if (!parsed.ok) {
-    return { status: "unparseable", reason: parsed.reason, line: parsed.line, servers: [], problems: [], findings: [] };
+    return { status: "unparseable", reason: parsed.reason, line: parsed.line, servers: [], problems: [], findings: [], settings: [] };
   }
   const { servers, problems } = extractServers(parsed.root);
   const reports: ServerReport[] = [];
-  const findings: Finding[] = [];
+  const settings = autoEnableFindings(parsed.root);
+  const findings: Finding[] = [...settings];
   for (const server of servers) {
-    const result = lintServer(server, rules);
+    const result = lintServer(server);
     const secrets = findSecrets(server);
-    const own = [...result.findings, ...secretFindings(server, secrets)].sort((a, b) => a.line - b.line);
+    const project = opts.project ? projectServerFinding(server) : undefined;
+    const own = [...(project ? [project] : []), ...result.findings, ...secretFindings(server, secrets)].sort((a, b) => a.line - b.line);
     reports.push({ server, allowShape: result.allowShape?.label, findings: own, secrets });
     findings.push(...own);
   }
   findings.sort((a, b) => a.line - b.line);
-  return { status: "ok", empty: parsed.root === undefined, servers: reports, problems, findings };
+  return { status: "ok", empty: parsed.root === undefined, servers: reports, problems, findings, settings };
 }

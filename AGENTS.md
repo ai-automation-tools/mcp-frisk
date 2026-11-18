@@ -7,8 +7,11 @@ routine (Monday, Wednesday and Friday).
 
 An offline linter for MCP config files. `mcpfrisk` finds the configs coding agents load (a
 repo's `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, and the per-user files for Claude
-Code, Claude Desktop, Cursor and VS Code), parses every server entry, and flags two things:
-`command`/`args` shaped like shell injection, and plaintext API keys in `env` or `args`. It
+Code, Claude Desktop, Cursor and VS Code), parses every server entry, and flags
+`command`/`args` shaped like shell injection or carrying inline code (`node -e`), plaintext API
+keys in `env` or `args`, servers a repo's own config defines, and a repo
+`.claude/settings.json` that starts those servers without asking (Slice 1b, the
+[threat model](docs/threat-model.md)'s answer to TrustFall). It
 prints findings as text, or as JSON in the Agent Security Suite's agent inventory format, and
 exits non-zero above `--fail-on`. A static browser demo on GitHub Pages runs the same rule code
 on a pasted config.

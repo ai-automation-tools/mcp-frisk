@@ -31,13 +31,15 @@ export interface RunResult {
 
 export const USAGE = `Usage: mcpfrisk [options] [file ...]
 
-Finds the MCP configs your coding agents load and flags shell-injection shapes
-and plaintext keys. Reads files only: never starts a server, runs a command or
-touches the network. Keys are shown as prefix plus last four, never in full.
+Finds the MCP configs your coding agents load and flags shell-injection shapes,
+inline code, plaintext keys, and project settings that start servers unasked.
+Reads files only: never starts a server, runs a command or touches the network.
+Keys are shown as prefix plus last four, never in full.
 
-With no files, checks the current folder's .mcp.json, .vscode/mcp.json and
-.cursor/mcp.json, then the per-user configs for Claude Code, Claude Desktop,
-Cursor and VS Code. With files, checks just those.
+With no files, checks the current folder's .mcp.json, .claude/settings.json,
+.claude/settings.local.json, .vscode/mcp.json and .cursor/mcp.json, then the
+per-user configs for Claude Code, Claude Desktop, Cursor and VS Code. With
+files, checks just those.
 
 Options:
   --home <dir>          read per-user configs from this home folder instead of yours
