@@ -78,7 +78,7 @@ test("displayPath shows repo files relative and home files under ~", () => {
 });
 
 // ADR-001: the demo imports these, so they may not import Node built-ins, at runtime or at all.
-const BROWSER_SAFE = ["jsonc.ts", "servers.ts", "rules.ts", "secrets.ts", "frisk.ts", "format.ts"];
+const BROWSER_SAFE = ["jsonc.ts", "servers.ts", "rules.ts", "secrets.ts", "frisk.ts", "format.ts", "version.ts", "demo.ts"];
 
 test("rule, parser and format modules import nothing but each other", () => {
   for (const file of BROWSER_SAFE) {
