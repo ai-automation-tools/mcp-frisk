@@ -21,13 +21,20 @@
     .src-link       { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; color: var(--mid); text-decoration: none; }
     .src-link:hover, .src-link:focus-visible { color: var(--fg); }
 
-    main { flex: 1; display: grid; place-items: center; padding: 48px 20px; }
-    .card { max-width: 600px; text-align: center; }
-    .card img { width: 64px; height: 64px; }
-    h1 { margin: 16px 0 8px; font-size: 28px; letter-spacing: -0.02em; }
+    main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 40px 20px 56px; }
+    header { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+    header img { width: 56px; height: 56px; flex: none; }
+    h1 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
     p { margin: 0 0 12px; color: var(--mid); }
-    .soon { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px;
-            background: var(--surface); color: var(--accent); font: 12px/1.6 "JetBrains Mono", ui-monospace, monospace; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 20px 0 10px; }
+    button { padding: 6px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font: inherit; cursor: pointer; }
+    button:hover, button:focus-visible { border-color: var(--accent); }
+    label { color: var(--mid); }
+    textarea, pre { width: 100%; margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+                    color: var(--fg); font: 13px/1.5 "JetBrains Mono", ui-monospace, monospace; }
+    textarea { min-height: 260px; resize: vertical; }
+    pre { margin-top: 12px; min-height: 80px; overflow-x: auto; white-space: pre; color: var(--accent); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -41,14 +48,25 @@
 </div>
 
 <main>
-  <div class="card">
+  <header>
     <img src="favicon.svg" alt="mcp-frisk icon: a magnifying glass">
     <h1>Lint an MCP config without running it</h1>
-    <p>mcp-frisk reads the MCP config files your coding agents load (<code>.mcp.json</code>, Claude Desktop, Cursor, VS Code) and flags <code>command</code> and <code>args</code> shaped like shell injection or carrying inline code, API keys sitting in plain text, and project settings that start a repo's servers without asking. It never starts a server and never makes a network call.</p>
-    <p>This page will let you paste a config and see the findings, using the same rule code as the CLI.</p>
-    <span class="soon">coming soon</span>
+  </header>
+  <p>Paste an MCP config (<code>.mcp.json</code>, Claude Desktop, Cursor, VS Code) and mcp-frisk flags <code>command</code> and <code>args</code> shaped like shell injection or carrying inline code, API keys sitting in plain text, and settings that start a repo's servers without asking. It runs the same rule code as the <code>mcpfrisk</code> CLI, here in your browser: nothing you paste is sent anywhere, and no server is started.</p>
+
+  <div class="controls">
+    <button type="button" id="sample">Load a sample config</button>
+    <label><input type="checkbox" id="project"> This is a repo's own config (<code>.mcp.json</code>, <code>.vscode/mcp.json</code>)</label>
   </div>
+  <label class="sr-only" for="config">MCP config to frisk</label>
+  <textarea id="config" spellcheck="false" autocomplete="off" placeholder='{ "mcpServers": { ... } }'></textarea>
+  <pre id="findings" aria-live="polite">Findings show up here as you paste. The sample's keys are planted fakes.</pre>
 </main>
+
+<script type="module">
+  import { mount } from "./js/demo.js";
+  mount(document);
+</script>
 
 </body>
 </html>

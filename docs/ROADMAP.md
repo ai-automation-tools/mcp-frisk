@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/now-slice_3:_browser_demo-F59E0B?style=for-the-badge" alt="Now: Slice 3, browser demo">
+  <img src="https://img.shields.io/badge/now-public_release-F59E0B?style=for-the-badge" alt="Now: public release">
   <img src="https://img.shields.io/badge/stage-incubating-2ea44f?style=for-the-badge" alt="Stage: incubating">
   <a href="README.md"><img src="https://img.shields.io/badge/↩-docs_home-6B7280?style=for-the-badge" alt="Back to docs"></a>
 </p>
@@ -45,7 +45,7 @@ owns; no item needs a real key, a running MCP server or network access.
 
 ## 🖥️ Slice 3: Browser demo
 
-- [ ] **Paste-and-frisk page** (MVP feature 3). `site/index.html` gets a paste box that runs the same rule and secret modules as the CLI (bundled or imported as ES modules from the build, no copy of the rules) and renders the findings with redaction. A sample config with one planted problem of each kind loads with one click, all keys obviously fake. A test loads the page's script with `fetch` and `XMLHttpRequest` stubbed to fail and proves frisking still works and nothing is sent. `npm run build` writes the page to `_site/`.
+- [x] **Paste-and-frisk page** (MVP feature 3). `site/index.html` gets a paste box that runs the same rule and secret modules as the CLI (bundled or imported as ES modules from the build, no copy of the rules) and renders the findings with redaction. A sample config with one planted problem of each kind loads with one click, all keys obviously fake. A test loads the page's script with `fetch` and `XMLHttpRequest` stubbed to fail and proves frisking still works and nothing is sent. `npm run build` writes the page to `_site/`. — done 2026-11-20: page script `src/demo.ts` (browser-safe, imports `frisk.ts` and `format.ts`, renders the CLI's text report into `textContent`) with a one-click sample planting all nine rules and two fake keys; `site/index.html` mounts it from `./js/demo.js`; `scripts/build-site.ts` (run by `npm run build`) copies `site/` plus `dist/demo.js` and its imports to `_site/`; `tests/demo.test.ts` drives the page with `fetch`, `XMLHttpRequest`, `WebSocket` and `sendBeacon` stubbed to fail. Not deployed: that's the live-demo item
 
 ## 🚦 Public release
 

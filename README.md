@@ -35,8 +35,8 @@
 > [!WARNING]
 > **Not released yet.** The `mcpfrisk` CLI works: it finds MCP configs, flags shell-injection
 > shapes, inline code, plaintext keys and auto-start settings, and writes text or an agent
-> inventory JSON report. The browser demo
-> is next. The [roadmap](docs/ROADMAP.md) says what's left before release.
+> inventory JSON report. The browser demo page builds (`npm run build` writes it to `_site/`)
+> but isn't deployed yet. The [roadmap](docs/ROADMAP.md) says what's left before release.
 
 ## 🎯 What it's for
 
@@ -94,7 +94,7 @@ From a clone, with Node 22.18 or newer:
 
 ```bash
 npm install          # dev dependencies only; mcp-frisk has no runtime dependencies
-npm run build        # compiles src/ to dist/
+npm run build        # compiles src/ to dist/, and the demo page to _site/
 node dist/cli.js     # frisks this folder's MCP configs and your own
 ```
 
@@ -197,22 +197,34 @@ own: `id` `mcp:<path>`, `kind: other`, tagged `settings`, holding that finding.
 Findings carry `ruleId` `mcp-frisk/<rule>` and the evidence line from the text output. What
 the schema has no field for (files checked, unparseable files and entries) goes in `x`.
 
+### Browser demo
+
+`npm run build` also writes a paste-and-frisk page to `_site/`: paste a config, or load a
+sample with one planted problem of each kind (its keys are fake), and the page shows the same
+text report as the CLI, keys redacted the same way. A checkbox treats the paste as a repo's own
+`.mcp.json`, which turns on `project-server`. The page script is
+[`src/demo.ts`](src/demo.ts), which imports the CLI's own rule and secret modules; the build
+copies it and those modules, compiled, to `_site/js/`. It makes no network call: a test runs it
+with `fetch`, `XMLHttpRequest`, `WebSocket` and `sendBeacon` stubbed to fail. Browsers won't
+load ES modules from `file://`, so preview it through any local static server, for example
+`python -m http.server -d _site`.
+
 ## 🗂️ What's in here
 
 | Folder | What's inside |
 |:---|:---|
 | [**📚 docs/**](docs/README.md) | The roadmap, the changelog, the spec and build plan, and ADR-001. |
-| [**🧩 src/**](src/) | The CLI. The parser, rules, secret detector and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `secrets.ts`, `frisk.ts`, `format.ts`) import nothing from Node, so the browser demo can load them; discovery, file reading and the JSON report (`discover.ts`, `scan.ts`, `inventory.ts`) are Node-only. |
+| [**🧩 src/**](src/) | The CLI. The parser, rules, secret detector and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `secrets.ts`, `frisk.ts`, `format.ts`) and the demo's page script (`demo.ts`) import nothing from Node, so the browser demo can load them; discovery, file reading and the JSON report (`discover.ts`, `scan.ts`, `inventory.ts`) are Node-only. |
 | [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, copied unchanged from its published `$id`. |
-| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, a TrustFall-shaped repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped. |
-| [**🖥️ site/**](site/) | The demo page and its favicon. A "coming soon" shell for now. |
+| [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, a TrustFall-shaped repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped, the demo with `fetch` and `XMLHttpRequest` stubbed to fail. |
+| [**🖥️ site/**](site/) | The demo page and its favicon. `npm run build` copies them to `_site/`, with the compiled browser-safe modules in `_site/js/` ([`scripts/build-site.ts`](scripts/build-site.ts)). |
 
 ## 🛠️ Development
 
 ```bash
 npm run lint    # ESLint plus tsc --noEmit
 npm test        # node --test
-npm run build   # tsc to dist/
+npm run build   # tsc to dist/, then the demo page to _site/
 ```
 
 Agents working this repo read [AGENTS.md](AGENTS.md) first. Security reports go through

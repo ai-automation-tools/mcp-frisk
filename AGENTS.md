@@ -45,7 +45,9 @@ Full spec: `docs/product/spec.md`. Slice order: `docs/product/build-plan.md`. Wo
   imports them too (ADR-001). File reading and path discovery live in separate Node-only
   modules (`discover.ts`, `scan.ts`, `main.ts`). The browser-safe set is listed in
   `BROWSER_SAFE` in `tests/cli.test.ts`, which fails if one of them imports anything else at
-  runtime; add a new browser-safe module there.
+  runtime; add a new browser-safe module there. The demo's page script is `src/demo.ts`;
+  `npm run build` runs `scripts/build-site.ts`, which copies `site/` and `dist/demo.js` plus
+  everything it imports to `_site/`, and fails if any of it imports a non-relative module.
 - Settings live in `.env` at the repo root, names in `.env.example`; the real environment
   wins. There are none today, and the product's promise (no network, no keys) means there
   should rarely be one. If one is ever needed, load it with Node's `util.parseEnv`. Never
