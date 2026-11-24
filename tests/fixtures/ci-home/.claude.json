@@ -1,0 +1,10 @@
+{
+  // CI's inventory check runs `mcpfrisk --json --home` on this folder. The key is planted and fake.
+  "mcpServers": {
+    "planted-shell": {
+      "command": "bash",
+      "args": ["-c", "node server.js"],
+      "env": { "ANTHROPIC_API_KEY": "sk-ant-FAKE0ci0key0for0mcpfrisk0inventory0x9Z8" }
+    }
+  }
+}
