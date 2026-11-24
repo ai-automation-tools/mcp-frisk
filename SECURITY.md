@@ -19,6 +19,10 @@ Please give us reasonable time to ship a fix before you disclose it.
 
 ## Scope
 
+mcp-frisk is a defensive tool: run it only on systems and config exports you own or are
+authorized to review. The README's [Responsible use](README.md#responsible-use) section says
+what it never does.
+
 mcp-frisk runs entirely on your machine, or entirely in your browser tab for the demo.
 There's no hosted service, no account and no telemetry. The surfaces that matter most:
 

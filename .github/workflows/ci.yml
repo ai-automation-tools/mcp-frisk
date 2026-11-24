@@ -44,3 +44,33 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  inventory:
+    name: Inventory output validates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # The check below validates against the vendored copy; this proves it is the published one.
+      - name: Vendored schema matches the published v0.1
+        run: |
+          curl -fsSL https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json -o "$RUNNER_TEMP/published.json"
+          cmp "$RUNNER_TEMP/published.json" schemas/agent-inventory.schema.json
+
+      - name: mcpfrisk --json on a planted fixture home validates and finds the problem
+        run: |
+          node dist/cli.js --json --home tests/fixtures/ci-home > "$RUNNER_TEMP/inventory.json"
+          node scripts/check-inventory.ts "$RUNNER_TEMP/inventory.json"
