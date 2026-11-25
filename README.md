@@ -84,19 +84,42 @@ in the page.
 ### What it won't do
 
 - Block a client from launching a server. It reports and sets an exit code.
+- Start, connect to or probe an MCP server, or run any command a config names.
+- Make a network call, from the CLI or the demo page.
 - Move your keys into a keychain or edit your configs.
 - Check servers against a "poisoned marketplace" list. No sourced list exists yet.
-- Run as a hosted service, with accounts or telemetry.
+- Run as a hosted service, with accounts or telemetry. There is no cloud tier.
+
+<a id="responsible-use"></a>
+
+## 🛡️ Responsible use
+
+mcp-frisk is a defensive tool. Run it on machines, repos and config exports you own or are
+authorized to review.
+
+- It never connects to an MCP server, local or remote.
+- It never launches a command a config names, and never spawns a process of its own.
+- It never changes the config it reads. It opens files read-only and writes nothing but its
+  report, to the terminal.
+- The demo page and this repo's fixtures use planted, fictional configs only. Every key in them
+  is fake and says `FAKE`.
 
 ## 🚀 Quick start
 
-From a clone, with Node 22.18 or newer:
+mcp-frisk needs Node 22.18 or newer. It isn't on npm yet; until it is, build the package from a
+clone and install that:
 
 ```bash
-npm install          # dev dependencies only; mcp-frisk has no runtime dependencies
-npm run build        # compiles src/ to dist/, and the demo page to _site/
-node dist/cli.js     # frisks this folder's MCP configs and your own
+git clone https://github.com/ai-automation-tools/mcp-frisk.git
+cd mcp-frisk
+npm ci                               # dev dependencies only; mcp-frisk has no runtime dependencies
+npm run build                        # compiles src/ to dist/, and the demo page to _site/
+npm pack                             # writes mcpfrisk-0.0.0.tgz
+npm install -g ./mcpfrisk-0.0.0.tgz  # puts mcpfrisk on your PATH
+mcpfrisk                             # frisks this folder's MCP configs and your own
 ```
+
+`node dist/cli.js` runs the same CLI from the clone without installing it.
 
 With no arguments it checks the current folder's `.mcp.json`, `.claude/settings.json`,
 `.claude/settings.local.json`, `.vscode/mcp.json` and `.cursor/mcp.json`, then the per-user
@@ -120,14 +143,14 @@ mcpfrisk [options] [file ...]
   --json                print an agent inventory document (schema v0.1), not text
   --fail-on <severity>  exit 1 if a finding is this severe or worse:
                         critical, high, medium, low or info
-  -h, --help            show help
+  -h, --help            show this help
   -v, --version         print the version
 ```
 
-On this repo's fixture `.mcp.json`:
+From the root of the clone, on this repo's fixture `.mcp.json`:
 
 ```text
-$ node dist/cli.js tests/fixtures/repo/.mcp.json
+$ mcpfrisk tests/fixtures/repo/.mcp.json
 mcpfrisk 0.0.0: checked 1 location, found 1 config with 2 servers.
 
 tests/fixtures/repo/.mcp.json: 2 servers, 2 findings
@@ -141,7 +164,7 @@ tests/fixtures/repo/.mcp.json: 2 servers, 2 findings
 On the secret fixture, failing on high:
 
 ```text
-$ node dist/cli.js --fail-on high tests/fixtures/rules/plaintext-secret.fires.json
+$ mcpfrisk --fail-on high tests/fixtures/rules/plaintext-secret.fires.json
 mcpfrisk 0.0.0: checked 1 location, found 1 config with 6 servers.
 
 tests/fixtures/rules/plaintext-secret.fires.json: 6 servers, 7 findings
@@ -159,10 +182,11 @@ $ echo $?
 ```
 
 In a repo shaped like TrustFall, a `node -e` server plus a settings file that auto-enables it
-(run from `tests/fixtures/trustfall/`, with an empty home):
+(with an empty home):
 
 ```text
-$ node ../../../dist/cli.js --home ../no-such-home --fail-on high
+$ cd tests/fixtures/trustfall
+$ mcpfrisk --home ../no-such-home --fail-on high
 mcpfrisk 0.0.0: checked 10 locations, found 2 configs with 1 server.
 
 .mcp.json (Claude Code, repo): 1 server, 2 findings
@@ -226,6 +250,12 @@ npm run lint    # ESLint plus tsc --noEmit
 npm test        # node --test
 npm run build   # tsc to dist/, then the demo page to _site/
 ```
+
+CI runs all three on Ubuntu and Windows. A second job checks the JSON report end to end: it
+confirms the vendored schema is byte-for-byte the [published v0.1](https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json),
+runs `mcpfrisk --json` on [`tests/fixtures/ci-home/`](tests/fixtures/ci-home/) (a `bash -c` server
+holding a fake key), and fails unless [`scripts/check-inventory.ts`](scripts/check-inventory.ts)
+finds the report valid and both findings in it.
 
 Agents working this repo read [AGENTS.md](AGENTS.md) first. Security reports go through
 [SECURITY.md](SECURITY.md), not public issues.
