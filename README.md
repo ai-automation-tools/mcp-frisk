@@ -241,6 +241,7 @@ load ES modules from `file://`, so preview it through any local static server, f
 | [**🧩 src/**](src/) | The CLI. The parser, rules, secret detector and formatter (`jsonc.ts`, `servers.ts`, `rules.ts`, `secrets.ts`, `frisk.ts`, `format.ts`) and the demo's page script (`demo.ts`) import nothing from Node, so the browser demo can load them; discovery, file reading and the JSON report (`discover.ts`, `scan.ts`, `inventory.ts`) are Node-only. |
 | [**📐 schemas/**](schemas/) | The agent inventory schema v0.1, copied unchanged from its published `$id`. |
 | [**🧪 tests/**](tests/) | `node:test` suites, run with `npm test`, and fixture configs: a repo, a TrustFall-shaped repo, Windows, macOS and Linux homes, and one firing and one passing file per rule. The report is validated against the schema, every output is checked for the planted keys, and the CLI is run with sockets and child processes trapped, the demo with `fetch` and `XMLHttpRequest` stubbed to fail. |
+| [**🤖 skills/**](skills/mcp-frisk/) | An agent skill, [`mcp-frisk`](skills/mcp-frisk/SKILL.md), that teaches Claude Code, Codex and other coding agents to install and run `mcpfrisk` in any repo and read its text, JSON and exit codes. |
 | [**🖥️ site/**](site/) | The demo page and its favicon. `npm run build` copies them to `_site/`, with the compiled browser-safe modules in `_site/js/` ([`scripts/build-site.ts`](scripts/build-site.ts)). |
 
 ## 🛠️ Development
