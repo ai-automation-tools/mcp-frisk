@@ -15,6 +15,8 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+- `CLAUDE.md` is gone: Claude Code reads `AGENTS.md` directly.
+
 **Added**
 - Live demo at `https://ai-automation-tools.dev/mcp-frisk/`: `.github/workflows/pages.yml` runs `npm run build` on every push to `main`, stamps the commit into `<meta name="build">` and deploys `_site/` to GitHub Pages. The README carries a Live Demo badge. *Public release*
 - Agent skill `skills/mcp-frisk/SKILL.md`: how a coding agent in any repo installs `mcpfrisk` (from source until it's on npm), runs it, reads the text and JSON output and exit codes, gates CI on it, and the traps (unreadable files don't change the exit code, `--fail-on critical` never trips, discovery mixes in the user's own configs without `--home`). Every flag and output field was checked against `--help` and real runs.
