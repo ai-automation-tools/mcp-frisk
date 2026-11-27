@@ -16,6 +16,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 ## Unreleased
 
 **Added**
+- Live demo at `https://ai-automation-tools.dev/mcp-frisk/`: `.github/workflows/pages.yml` runs `npm run build` on every push to `main`, stamps the commit into `<meta name="build">` and deploys `_site/` to GitHub Pages. The README carries a Live Demo badge. *Public release*
 - Agent skill `skills/mcp-frisk/SKILL.md`: how a coding agent in any repo installs `mcpfrisk` (from source until it's on npm), runs it, reads the text and JSON output and exit codes, gates CI on it, and the traps (unreadable files don't change the exit code, `--fail-on critical` never trips, discovery mixes in the user's own configs without `--home`). Every flag and output field was checked against `--help` and real runs.
 - CI checks the inventory report end to end. A new `inventory` job confirms the vendored schema is byte-for-byte the published `https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json`, runs `mcpfrisk --json` on a fixture home with a planted `bash -c` server holding a fake key (`tests/fixtures/ci-home/`), and fails unless `scripts/check-inventory.ts` finds the report valid and both findings in it. *Public release*
 - Build stamp: `site/index.html` carries `<meta name="build" content="__BUILD_SHA__">` for the Pages deploy to fill in. *Public release*
