@@ -34,6 +34,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 - Roadmap rechecked against the org's 2026-11 requirements: the intro names the roadmap routine instead of its days; new release items for the Pillar A schema-in-CI gate, the build stamp and an owner question on whether the auto-start rules are a gate; the live-demo item stamps the build; Slice 1b (auto-start and inline-code rules) heads the next slices; "Move the agent inventory schema public" became "Link the published schema", since the schema is already published at `ai-automation-tools.dev`.
 - Gate check in `docs/reports/2026-gate-check.md`: eight existing MCP scanners compared. No maintained offline tool covers the three Musts, so the build continues. *Slice 0: Gate check*
 - Threat model in `docs/threat-model.md`: TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm checked against primary sources, with the spec's mischaracterizations noted and a scope question opened in `docs/OPEN-QUESTIONS.md`. *Slice 0: Gate check*
+- ROADMAP: added an Amazon Q Developer discovery item to Next slices. CVE-2026-12957 showed Amazon Q running the servers in a cloned repo's `.amazonq/mcp.json` with no trust prompt, the exact repo-borne attack mcp-frisk exists for, and discovery doesn't read that file yet.
 
 ## 2026-11-05
 
