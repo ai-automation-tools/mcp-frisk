@@ -78,7 +78,7 @@ Nothing below blocks go-live.
 - [ ] `small` `CONTRIBUTING.md` saying how to run the tests and add a rule with its passing and failing fixtures.
 - [ ] `npm publish --dry-run` is clean, then tag v0.1 and publish to npm as `mcpfrisk`. 🔒 Needs owner
 - [ ] Launch post built on the demo ("paste your `.mcp.json`, see what it would run"), sent where agent-security practitioners read. 🔒 Needs owner
-- [ ] Custom subdomain `mcp-frisk-demo.ai-automation-tools.dev`. 🔒 Needs owner
+- [x] Custom subdomain `mcp-frisk-demo.ai-automation-tools.dev`. 🔒 Needs owner — done 2026-11-27: the publish run set it and enforced HTTPS; the old `ai-automation-tools.dev/mcp-frisk/` path 301s to it
 - [ ] 60 days after the repo goes public, run the build plan's stop test: under 50 stars and 200 npm downloads means stop post-release work and park it. 🔒 Needs owner
 
 ### 💰 Revenue
