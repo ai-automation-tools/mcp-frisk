@@ -30,6 +30,7 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 - `mcpfrisk` finds MCP configs in the current repo (`.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`) and the user's home (Claude Code, Claude Desktop, Cursor, VS Code) on Windows, macOS and Linux paths, parses them as JSONC, and flags shell-injection shapes with four rules (`shell-wrapper`, `command-substitution`, `shell-variable`, `shell-operator`) while `npx -y`, `uvx` and `docker run` pass. Each finding names its rule, server, file and line; unparseable files and entries and unreadable files get a reason. CI now runs on Ubuntu and Windows. *Slice 1: Frisk a config*
 
 **Docs**
+- ROADMAP: ticked the `SITE_ORG_DEPLOY_KEY` item. The key lives in the `registry-publish` environment (`main` only), not as a plain repo secret.
 - README: status badge now active (was incubating), and the Live Demo badge links to `https://mcp-frisk-demo.ai-automation-tools.dev/`.
 - ROADMAP: ticked the `-demo.` subdomain item, which the publish run already set up.
 - README usage matches the packed build: an install line (build and `npm pack` from a clone, then `npm install -g`, until it's on npm), the examples run as `mcpfrisk`, and the Won't list now says plainly that it starts no server and makes no network call. Every command was run against the installed tarball. *Public release*
