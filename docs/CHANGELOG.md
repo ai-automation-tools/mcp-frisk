@@ -15,7 +15,10 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 ## Unreleased
 
+- `CLAUDE.md` is gone: Claude Code reads `AGENTS.md` directly.
+
 **Added**
+- `docs/UPSTREAMS.md` lists every client config format, threat source, key prefix, schema and platform mcp-frisk depends on, for the biweekly upstream check, and `.github/dependabot.yml` raises weekly grouped minor and patch bumps for npm and GitHub Actions.
 - Live demo at `https://ai-automation-tools.dev/mcp-frisk/`: `.github/workflows/pages.yml` runs `npm run build` on every push to `main`, stamps the commit into `<meta name="build">` and deploys `_site/` to GitHub Pages. The README carries a Live Demo badge. *Public release*
 - Agent skill `skills/mcp-frisk/SKILL.md`: how a coding agent in any repo installs `mcpfrisk` (from source until it's on npm), runs it, reads the text and JSON output and exit codes, gates CI on it, and the traps (unreadable files don't change the exit code, `--fail-on critical` never trips, discovery mixes in the user's own configs without `--home`). Every flag and output field was checked against `--help` and real runs.
 - CI checks the inventory report end to end. A new `inventory` job confirms the vendored schema is byte-for-byte the published `https://ai-automation-tools.dev/schemas/agent-inventory/v0.1.json`, runs `mcpfrisk --json` on a fixture home with a planted `bash -c` server holding a fake key (`tests/fixtures/ci-home/`), and fails unless `scripts/check-inventory.ts` finds the report valid and both findings in it. *Public release*
@@ -28,11 +31,14 @@ Entries that close a roadmap item carry the roadmap phase in italics.
 
 **Docs**
 - ROADMAP: ticked the `SITE_ORG_DEPLOY_KEY` item. The key lives in the `registry-publish` environment (`main` only), not as a plain repo secret.
+- README: status badge now active (was incubating), and the Live Demo badge links to `https://mcp-frisk-demo.ai-automation-tools.dev/`.
+- ROADMAP: ticked the `-demo.` subdomain item, which the publish run already set up.
 - README usage matches the packed build: an install line (build and `npm pack` from a clone, then `npm install -g`, until it's on npm), the examples run as `mcpfrisk`, and the Won't list now says plainly that it starts no server and makes no network call. Every command was run against the installed tarball. *Public release*
 - README "Responsible use" section: defensive use only, on systems you own or may review; never connects to a server, launches a configured command or changes a config; the demo and fixtures are planted and fictional. `SECURITY.md` links to it. *Public release*
 - Roadmap rechecked against the org's 2026-11 requirements: the intro names the roadmap routine instead of its days; new release items for the Pillar A schema-in-CI gate, the build stamp and an owner question on whether the auto-start rules are a gate; the live-demo item stamps the build; Slice 1b (auto-start and inline-code rules) heads the next slices; "Move the agent inventory schema public" became "Link the published schema", since the schema is already published at `ai-automation-tools.dev`.
 - Gate check in `docs/reports/2026-gate-check.md`: eight existing MCP scanners compared. No maintained offline tool covers the three Musts, so the build continues. *Slice 0: Gate check*
 - Threat model in `docs/threat-model.md`: TrustFall, CVE-2026-47751, CVE-2026-57860 and the Miasma worm checked against primary sources, with the spec's mischaracterizations noted and a scope question opened in `docs/OPEN-QUESTIONS.md`. *Slice 0: Gate check*
+- ROADMAP: added an Amazon Q Developer discovery item to Next slices. CVE-2026-12957 showed Amazon Q running the servers in a cloned repo's `.amazonq/mcp.json` with no trust prompt, the exact repo-borne attack mcp-frisk exists for, and discovery doesn't read that file yet.
 
 ## 2026-11-05
 
